@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 
-namespace BlueRavenUtility.AssetsNew
+namespace BrUtility
 {
 	public class AssetHandlerNineSlice : AssetHandler
 	{

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BrUtility
+namespace BrTiledLoader
 {
 	public class AssetHandlerTiledMap : AssetHandler
 	{
