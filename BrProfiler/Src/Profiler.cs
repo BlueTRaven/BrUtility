@@ -80,6 +80,8 @@ namespace BrProfiler
 				result.snippetsByName.Add(snippets[i].name, snippets[i]);
 			}
 
+			snippets.Clear();
+
 			started = false;
 			return result;
 		}
