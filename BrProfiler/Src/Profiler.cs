@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BrProfiler
 {
-	public static class BrProfiler
+	public static class Profiler
 	{
 		public ref struct ProfileResult
 		{
