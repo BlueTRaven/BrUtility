@@ -1,4 +1,5 @@
 ﻿using BlueRavenUtility;
+using BrUtility;
 using BrUtility.Src;
 using System;
 using System.Collections.Generic;
@@ -13,29 +14,27 @@ namespace BrProfiler
 	{
 		public ref struct ProfileResult
 		{
-			public Dictionary<string, ProfileSnippet> snippetsByName;
-			public FastList<ProfileSnippet> iterableSnippets;
+			public Dictionary<string, TimeSpan> timespans;
 		}
 
-		public struct ProfileSnippet
+		public class ProfileSnippet : IPoolable
 		{
-			internal readonly string name;
+			internal string name;
 			private Stopwatch watch;
 
-			internal ProfileSnippet(string name)
+			internal bool started;
+
+			internal void Start(string name)
 			{
 				this.name = name;
-				watch = null;
-			}
-
-			internal void Start()
-			{
 				watch = Stopwatch.StartNew();
+				started = true;
 			}
 
 			internal void Stop()
 			{
 				watch.Stop();
+				started = false;
 			}
 
 			public TimeSpan GetTime()
@@ -44,10 +43,23 @@ namespace BrProfiler
 					return watch.Elapsed;
 				else return default;
 			}
+
+			public void OnGet<T>(GenericPool<T> pool) where T : IPoolable
+			{
+				watch = null;
+				name = null;
+			}
+
+			public void OnReturned<T>(GenericPool<T> pool) where T : IPoolable
+			{
+			}
 		}
+
+		private static GenericPool<ProfileSnippet> pooledSnippets = new GenericPool<ProfileSnippet>(() => { return new ProfileSnippet(); });
 
 		//fast list supports ref indexing
 		private static FastList<ProfileSnippet> snippets = new FastList<ProfileSnippet>();
+		private static Dictionary<string, ProfileSnippet> snippetsByName = new Dictionary<string, ProfileSnippet>();
 
 		private static bool started;
 
@@ -72,15 +84,16 @@ namespace BrProfiler
 			}
 
 			ProfileResult result = new ProfileResult();
-			result.iterableSnippets = snippets;
-			result.snippetsByName = new Dictionary<string, ProfileSnippet>();
+			result.timespans = new Dictionary<string, TimeSpan>();
 
 			for (int i = 0; i < snippets.Length; i++)
 			{
-				result.snippetsByName.Add(snippets[i].name, snippets[i]);
+				result.timespans.Add(snippets[i].name, snippets[i].GetTime());
+				pooledSnippets.Return(snippets[i]);
 			}
 
 			snippets.Clear();
+			snippetsByName.Clear();
 
 			started = false;
 			return result;
@@ -94,9 +107,10 @@ namespace BrProfiler
 				return;
 			}
 
-			ProfileSnippet snippet = new ProfileSnippet(name);
+			ProfileSnippet snippet = pooledSnippets.Get();
 			snippets.Add(snippet);
-			snippet.Start();
+			snippetsByName.Add(name, snippet);
+			snippet.Start(name);
 		}
 
 		public static void EndSnippet(string name)
@@ -107,19 +121,15 @@ namespace BrProfiler
 				return;
 			}
 
-			bool foundAny = false;
-
-			for (int i = 0; i < snippets.Length; i++)
+			if (snippetsByName.ContainsKey(name))
 			{
-				if (snippets[i].name == name)
+				if (!snippetsByName[name].started)
 				{
-					snippets[i].Stop();
-					foundAny = true;
-					break;
+					Logger.GetLogger("Profiler").Log(Logger.LogLevel.Error, "Tried to end snippet with name " + name + ", but this snippet has not been started yet.");
 				}
+				snippetsByName[name].Stop();
 			}
-
-			if (!foundAny)
+			else
 			{
 				Logger.GetLogger("Profiler").Log(Logger.LogLevel.Error, "Tried to end snippet with name " + name + ", but no snippet with that name exists. Did you typo or forget a StartSnippet?");
 			}
