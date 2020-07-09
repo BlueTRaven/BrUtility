@@ -48,6 +48,14 @@ namespace BlueRavenUtility
             South
         }
 
+		public enum DirectionFrontal
+		{
+			Left,
+			Back,
+			Right,
+			Front
+		}
+
         public enum DirectionCardinalG
         {
 			None,
@@ -70,14 +78,89 @@ namespace BlueRavenUtility
             SouthWest
         }
 
-        #region extentions
-        public static bool Has<T>(this System.Enum type, T value)
+		#region extentions
+		/// <summary>
+		/// Must be an enum that is one of the following types:
+		/// <list type="bullet|table">
+		/// <item>
+		/// <term>int</term>
+		/// </item>
+		/// <item>
+		/// <term>uint</term>
+		/// </item>
+		/// <item>
+		/// <term>long</term>
+		/// </item>
+		/// <item>
+		/// <term>ulong</term>
+		/// </item>
+		/// <item>
+		/// <term>short</term>
+		/// </item>
+		/// <item>
+		/// <term>ushort</term>
+		/// </item>
+		/// <item>
+		/// <term>byte</term>
+		/// </item>
+		/// </list>
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="type"></param>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		public static bool Has<T>(this System.Enum type, T value)
         {
             try
             {
-                int typeV = (int)(object)type;
-                int valV = (int)(object)value;
-                return ((typeV & valV) == valV);
+				var underlyingType = Enum.GetUnderlyingType(typeof(T));
+				
+				if (underlyingType == typeof(int))
+				{
+					int typeV = (int)(object)type;
+					int valV = (int)(object)value;
+					return ((typeV & valV) == valV);
+				}
+				else if (underlyingType == typeof(uint))
+				{
+					uint typeV = (uint)(object)type;
+					uint valV = (uint)(object)value;
+					return ((typeV & valV) == valV);
+				}
+				else if (underlyingType == typeof(long))
+				{
+					long typeV = (long)(object)type;
+					long valV = (long)(object)value;
+					return ((typeV & valV) == valV);
+				}
+				else if (underlyingType == typeof(ulong))
+				{
+					ulong typeV = (ulong)(object)type;
+					ulong valV = (ulong)(object)value;
+					return ((typeV & valV) == valV);
+				}
+				else if (underlyingType == typeof(short))
+				{
+					short typeV = (short)(object)type;
+					short valV = (short)(object)value;
+					return ((typeV & valV) == valV);
+				}
+				else if (underlyingType == typeof(ushort))
+				{
+					ushort typeV = (ushort)(object)type;
+					ushort valV = (ushort)(object)value;
+					return ((typeV & valV) == valV);
+				}
+				else if (underlyingType == typeof(byte))
+				{
+					byte typeV = (byte)(object)type;
+					byte valV = (byte)(object)value;
+					return ((typeV & valV) == valV);
+				}
+				else
+				{
+					throw new Exception("Has<T> does not support enums of type " + underlyingType + ".");
+				}
             }
             catch
             {
@@ -89,7 +172,26 @@ namespace BlueRavenUtility
         {
             try
             {
-                return (int)(object)type == (int)(object)value;
+				var underlyingType = Enum.GetUnderlyingType(typeof(T));
+
+				if (underlyingType == typeof(int))
+					return (int)(object)type == (int)(object)value;
+				else if (underlyingType == typeof(uint))
+					return (uint)(object)type == (uint)(object)value;
+				else if (underlyingType == typeof(long))
+					return (long)(object)type == (long)(object)value;
+				else if (underlyingType == typeof(ulong))
+					return (ulong)(object)type == (ulong)(object)value;
+				else if (underlyingType == typeof(short))
+					return (short)(object)type == (short)(object)value;
+				else if (underlyingType == typeof(ushort))
+					return (ushort)(object)type == (ushort)(object)value;
+				else if (underlyingType == typeof(byte))
+					return (byte)(object)type == (byte)(object)value;
+				else
+				{
+					throw new Exception("Is<T> does not support enums of type " + underlyingType + ".");
+				}
             }
             catch
             {
@@ -101,7 +203,26 @@ namespace BlueRavenUtility
         {
             try
             {
-                return (T)(object)(((int)(object)type | (int)(object)value));
+				var underlyingType = Enum.GetUnderlyingType(typeof(T));
+
+				if (underlyingType == typeof(int))
+					return (T)(object)(((int)(object)type | (int)(object)value));
+				else if (underlyingType == typeof(uint))
+					return (T)(object)(((uint)(object)type | (uint)(object)value));
+				else if (underlyingType == typeof(long))
+					return (T)(object)(((long)(object)type | (long)(object)value));
+				else if (underlyingType == typeof(ulong))
+					return (T)(object)(((ulong)(object)type | (ulong)(object)value));
+				else if (underlyingType == typeof(short))
+					return (T)(object)(((short)(object)type | (short)(object)value));
+				else if (underlyingType == typeof(ushort))
+					return (T)(object)(((ushort)(object)type | (ushort)(object)value));
+				else if (underlyingType == typeof(byte))
+					return (T)(object)(((byte)(object)type | (byte)(object)value));
+				else
+				{
+					throw new Exception("Add<T> does not support enums of type " + underlyingType + ".");
+				}
             }
             catch (Exception ex)
             {
@@ -117,7 +238,26 @@ namespace BlueRavenUtility
         {
             try
             {
-                return (T)(object)(((int)(object)type & ~(int)(object)value));
+				var underlyingType = Enum.GetUnderlyingType(typeof(T));
+
+				if (underlyingType == typeof(int))
+					return (T)(object)(((int)(object)type & ~(int)(object)value));
+				else if (underlyingType == typeof(uint))
+					return (T)(object)(((uint)(object)type & ~(uint)(object)value));
+				else if (underlyingType == typeof(long))
+					return (T)(object)(((long)(object)type & ~(long)(object)value));
+				else if (underlyingType == typeof(ulong))
+					return (T)(object)(((ulong)(object)type & ~(ulong)(object)value));
+				else if (underlyingType == typeof(short))
+					return (T)(object)(((short)(object)type & ~(short)(object)value));
+				else if (underlyingType == typeof(ushort))
+					return (T)(object)(((ushort)(object)type & ~(ushort)(object)value));
+				else if (underlyingType == typeof(byte))
+					return (T)(object)(((byte)(object)type & ~(byte)(object)value));
+				else
+				{
+					throw new Exception("Add<T> does not support enums of type " + underlyingType + ".");
+				}
             }
             catch (Exception ex)
             {
@@ -133,9 +273,9 @@ namespace BlueRavenUtility
         {
             try
             {
-                if (type.Has(value))
-                    return (T)(object)(((int)(object)type & ~(int)(object)value));
-                else return (T)(object)(((int)(object)type | (int)(object)value));
+				if (type.Has(value))
+					return type.Add(value);
+				else return type.Remove(value);
             }
             catch (Exception ex)
             {

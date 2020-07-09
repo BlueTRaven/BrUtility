@@ -7,22 +7,21 @@ using System.Threading.Tasks;
 
 namespace BrTiledLoader
 {
-	public class TiledTileInstance
+	public struct TiledTileInstance
 	{
 		public TiledTile tile;
 		public Point position;
 		public string layer;
 
-		public TiledTileInstance()
-		{
-
-		}
+		public bool valid;
 
 		public TiledTileInstance(TiledTile tile, Point position, string layer)
 		{
 			this.tile = tile;
 			this.position = position;
 			this.layer = layer;
+
+			valid = true;
 		}
 	}
 }

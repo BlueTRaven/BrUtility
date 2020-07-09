@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace BrNineSlice
 {
-	public class NineSlice
+	public class NineSlice : IDisposable
 	{
 		public enum DrawMode
 		{
@@ -162,10 +162,15 @@ namespace BrNineSlice
 			{
 				if (drawMode != DrawMode.Simple)
 				{
-					Vector2 topLeft = rectangle.Position.ToPoint().ToVector2();
-					Vector2 topRight = (rectangle.Position + (new Vector2(rectangle.width - distRight * scale, 0))).ToPoint().ToVector2();
-					Vector2 bottomLeft = (rectangle.Position + (new Vector2(0, rectangle.height - distBottom * scale))).ToPoint().ToVector2();
-					Vector2 bottomRight = (rectangle.Position + new Vector2(rectangle.width - distRight * scale, rectangle.height - distBottom * scale)).ToPoint().ToVector2();
+					float scaledRight = distRight * scale;
+					float scaledBottom = distBottom * scale;
+					float scaledLeft = distLeft * scale;
+					float scaledTop = distTop * scale;
+
+					Vector2 topLeft = rectangle.Position;
+					Vector2 topRight = (rectangle.Position + new Vector2(rectangle.width - distRight * scale, 0));
+					Vector2 bottomLeft = (rectangle.Position + new Vector2(0, rectangle.height - distBottom * scale));
+					Vector2 bottomRight = (rectangle.Position + new Vector2(rectangle.width - distRight * scale, rectangle.height - distBottom * scale));
 
 					batch.Draw(TexTopLeft, topLeft, null, color, 0, Vector2.Zero, scale, SpriteEffects.None, drawDepth);
 					batch.Draw(TexTopRight, topRight, null, color, 0, Vector2.Zero, scale, SpriteEffects.None, drawDepth);
@@ -177,21 +182,26 @@ namespace BrNineSlice
 					RectangleF fLeft = new RectangleF(0, 0, distLeft, (rectangle.height / scale) - (distTop + distBottom));
 					RectangleF fRight = new RectangleF(0, 0, distRight, fLeft.height);
 
-					batch.Draw(TexTop, new Vector2(topLeft.X + distLeft * scale, topLeft.Y), fTop.ToRectangle(), color, 0, Vector2.Zero, scale, SpriteEffects.None, drawDepth);
-					batch.Draw(TexLeft, new Vector2(topLeft.X, topLeft.Y + distTop * scale), fLeft.ToRectangle(), color, 0, Vector2.Zero, scale, SpriteEffects.None, drawDepth);
-					batch.Draw(TexRight, new Vector2(topRight.X, topRight.Y + distTop * scale), fRight.ToRectangle(), color, 0, Vector2.Zero, scale, SpriteEffects.None, drawDepth);
-					batch.Draw(TexBottom, new Vector2(bottomLeft.X + distLeft * scale, bottomLeft.Y), fBottom.ToRectangle(), color, 0, Vector2.Zero, scale, SpriteEffects.None, drawDepth);
+					batch.Draw(TexTop, new Vector2(topLeft.X + distLeft * scale, topLeft.Y), RoundRect(fTop), color, 0, Vector2.Zero, scale, SpriteEffects.None, drawDepth);
+					batch.Draw(TexLeft, new Vector2(topLeft.X, topLeft.Y + distTop * scale), RoundRect(fLeft), color, 0, Vector2.Zero, scale, SpriteEffects.None, drawDepth);
+					batch.Draw(TexRight, new Vector2(topRight.X, topRight.Y + distTop * scale), RoundRect(fRight), color, 0, Vector2.Zero, scale, SpriteEffects.None, drawDepth);
+					batch.Draw(TexBottom, new Vector2(bottomLeft.X + distLeft * scale, bottomLeft.Y), RoundRect(fBottom), color, 0, Vector2.Zero, scale, SpriteEffects.None, drawDepth);
 
 					RectangleF fCenterSR = new RectangleF(Vector2.Zero, (rectangle.width / scale) - (distLeft + distRight), 
 						(rectangle.height / scale) - (distTop + distBottom));
-					batch.Draw(TexCenter, new Vector2(rectangle.x + distLeft * scale, rectangle.y + distTop * scale).ToPoint().ToVector2()
-						, fCenterSR.ToRectangle(), color, 0, Vector2.Zero, scale, SpriteEffects.None, drawDepth);
+					batch.Draw(TexCenter, new Vector2(rectangle.x + distLeft * scale, rectangle.y + distTop * scale),
+						RoundRect(fCenterSR), color, 0, Vector2.Zero, scale, SpriteEffects.None, drawDepth);
 				}
 				else
 				{
 					batch.Draw(texture, rectangle.ToRectangle(), null, color, 0, Vector2.Zero, SpriteEffects.None, drawDepth);
 				}
 			}
+		}
+
+		private Rectangle RoundRect(RectangleF rect)
+		{
+			return new Rectangle((int)Math.Floor(rect.x), (int)Math.Floor(rect.y), (int)Math.Floor(rect.width), (int)Math.Floor(rect.height));
 		}
 
 		private void DrawCenter(SpriteBatch batch, Texture2D texture, Color color, RectangleF rectangle, float drawDepth = 0)
@@ -318,6 +328,26 @@ namespace BrNineSlice
 				Rectangle drawRect = new Rectangle(new Vector2(xpos, rectangle.y + distTop + (EdgeLeft.height * (int)num)).ToPoint(), 
 					new Vector2(distLeft, over * EdgeLeft.height).ToPoint());
 				batch.Draw(texture, drawRect, EdgeLeft.ToRectangle(), color, 0, Vector2.Zero, SpriteEffects.None, drawDepth);
+			}
+		}
+
+		private bool disposed;
+
+		public void Dispose()
+		{
+			if (!disposed)
+			{
+				disposed = true;
+
+				TexTopLeft.Dispose();
+				TexTopRight.Dispose();
+				TexBotLeft.Dispose();
+				TexBotRight.Dispose();
+				TexLeft.Dispose();
+				TexRight.Dispose();
+				TexBottom.Dispose();
+				TexTop.Dispose();
+				TexCenter.Dispose();
 			}
 		}
 	}

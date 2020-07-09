@@ -847,6 +847,7 @@ namespace BrIMGUI
 			int buttonID = ids.Count;
 			if ((Button(dragPanelContent) || (clicked.id == buttonID && inputManager.IsPressed(MouseInput.LeftButton))) && canDrag)
 			{   //we are dragging
+				float amt = 1f / scale;
 				finalPosition += inputManager.GetMouseDelta() / 2; //divide by two for some reason???
 				//TODO really need to figure out why this is. There's definitely some inconsistency between coordinate systems for some reason.
 			}

@@ -76,7 +76,7 @@ namespace BlueRavenUtility
 		public static float AngleLerp(float start, float end, float percent)
 		{
 			float max = 360;
-			float da = (end - start) % max;
+			float da = Mod((end - start), max);
 			float f = ((2 * da) % max) - da;
 
 			return start + (f * percent);

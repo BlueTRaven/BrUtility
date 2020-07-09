@@ -143,6 +143,11 @@ namespace BlueRavenUtility
 			return new Vector2(rand.NextFloat(rectangle.X, rectangle.X + rectangle.Width), rand.NextFloat(rectangle.Y, rectangle.Y + rectangle.Height));
 		}
 
+		public static Vector2 NextInside(this Random rand, in Rectangle rectangle)
+		{
+			return new Vector2(rand.NextFloat(rectangle.X, rectangle.X + rectangle.Width), rand.NextFloat(rectangle.Y, rectangle.Y + rectangle.Height));
+		}
+
 		public static Vector2 NextOnEdge(this Random rand, Rectangle rectangle)
 		{
 			int side = rand.Next(4);
@@ -165,6 +170,11 @@ namespace BlueRavenUtility
 		public static Vector2 NextInside(this Random rand, RectangleF rectangle)
 		{
 			return rand.NextInside(rectangle.ToRectangle());
+		}
+
+		public static Vector2 NextInside(this Random rand, in RectangleF rectangle)
+		{
+			return rand.NextInside(rectangle);
 		}
 
 		public static Vector2 NextOnEdge(this Random rand, RectangleF rectangle)

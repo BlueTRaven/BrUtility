@@ -151,10 +151,13 @@ namespace BlueRavenUtility
 
 		public static void DrawRotatedRectangle(this SpriteBatch batch, RotatedRectangleF rectangle, Vector2 offset, Color color, float depth)
 		{
-			batch.DrawLine(rectangle.TopLeft - offset, rectangle.TopRight - offset, color, 1, depth);
-			batch.DrawLine(rectangle.TopRight - offset, rectangle.BottomRight - offset, color, 1, depth);
-			batch.DrawLine(rectangle.BottomRight - offset, rectangle.BottomLeft - offset, color, 1, depth);
-			batch.DrawLine(rectangle.BottomLeft - offset, rectangle.TopLeft - offset, color, 1, depth);
+			RotatedRectangleF offsetRect = rectangle.Offset(offset);
+			batch.DrawLine(offsetRect.TopLeft, offsetRect.TopRight, color, 1, depth);
+			batch.DrawLine(offsetRect.TopRight, offsetRect.BottomRight, color, 1, depth);
+			batch.DrawLine(offsetRect.BottomRight, offsetRect.BottomLeft, color, 1, depth);
+			batch.DrawLine(offsetRect.BottomLeft, offsetRect.TopLeft, color, 1, depth);
+
+			batch.DrawHollowCircle((new Vector2(offsetRect.baseRectangle.Left, offsetRect.baseRectangle.Top) + offsetRect.origin), 8, color, 1, 16, 1);
 		}
 	}
 }

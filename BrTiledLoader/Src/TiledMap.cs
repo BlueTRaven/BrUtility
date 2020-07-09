@@ -11,9 +11,9 @@ namespace BrTiledLoader
 	{
 		public Rectangle bounds;
 		
-		public List<TiledObject> tiledObjects = new List<TiledObject>();
+		public List<TiledObject> Objects { get; private set; } = new List<TiledObject>();
 
-		public Dictionary<string, TiledLayer> tiles = new Dictionary<string, TiledLayer>();
+		public Dictionary<string, TiledLayer> Layers { get; private set; } = new Dictionary<string, TiledLayer>();
 
 		public int width, height;
 		public int tileWidth, tileHeight;
@@ -38,22 +38,36 @@ namespace BrTiledLoader
 
 		public void AddLayer(string name, TiledLayer layer)
 		{
-			tiles.Add(name, layer);
+			Layers.Add(name, layer);
+		}
+
+		public bool HasLayer(string name)
+		{
+			return Layers.ContainsKey(name);
+		}
+
+		public TiledLayer GetLayer(string name)
+		{
+			if (HasLayer(name))
+				return Layers[name];
+			else return null;
 		}
 
 		public List<TiledLayer> GetLayers()
 		{
-			return tiles.Values.ToList();
+			return Layers.Values.ToList();
 		}
 
-		public void SetTile(string layer, Point pos, TiledTileInstance instance)
+		public void SetTile(string layer, Point pos, TiledTile tileType)
 		{
-			tiles[layer].tiles[pos.X, pos.Y] = instance;
+			if (tileType == null)
+				Layers[layer].tiles[pos.X, pos.Y] = default;
+			else Layers[layer].tiles[pos.X, pos.Y] = new TiledLayer.TileType() { id = (short)tileType.gid };
 		}
 
 		public TiledTileInstance GetTile(string layer, Point pos)
 		{
-			return tiles[layer].tiles[pos.X, pos.Y];
+			return Layers[layer].GetTile(pos);
 		}
 	}
 }

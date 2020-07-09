@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BlueRavenUtility
 {
-	public class RotatedRectangleF
+	public struct RotatedRectangleF
 	{
 		public RectangleF baseRectangle;
 		public float rotation;

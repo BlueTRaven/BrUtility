@@ -11,7 +11,8 @@ namespace BrTiledLoader
 {
 	public class TiledTile
 	{
-		public int id;
+		public int tilesetId;
+		public int gid;
 		public string type;
 
 		//public Animation animation;
@@ -31,7 +32,7 @@ namespace BrTiledLoader
 
 		public void Initialize(TmxTilesetTile tile, float drawPriority, string textureName, Rectangle sourceRectangle)
 		{
-			this.id = tile.Id;
+			this.tilesetId = tile.Id;
 
 			this.drawPriority = drawPriority;
 			this.textureName = textureName;
@@ -42,7 +43,7 @@ namespace BrTiledLoader
 			properties = tile.Properties;
 		}
 
-		public void Initialize(float drawPriority, Texture2D texture, Rectangle sourceRectangle, Dictionary<string, string> properties)
+		/*public void Initialize(float drawPriority, Texture2D texture, Rectangle sourceRectangle, Dictionary<string, string> properties)
 		{
 			this.drawPriority = drawPriority;
 			this.texture = texture;
@@ -59,7 +60,7 @@ namespace BrTiledLoader
 					this.properties.Add(key, properties[key]);
 				}
 			}
-		}
+		}*/
 
 		public bool HasTexture()
 		{

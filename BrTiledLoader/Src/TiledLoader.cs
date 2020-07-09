@@ -68,10 +68,15 @@ namespace BrTiledLoader
 				foreach (TmxTilesetTile tilesetTile in tileset.Tiles.Values)
 				{
 					int gid = tilesetTile.Id + tileset.FirstGid;
-					allTiles.Add(gid, ParseTile(tileset, tilesetTile));
+					TiledTile t = ParseTile(tileset, tilesetTile);
+					t.gid = gid;
+					allTiles.Add(gid, t);
 
-					LoadMessage = "Loading tilesets...\n" +
-						"Tileset " + tileset.Name + ", gid: " + gid;
+					if (outputLoadMessage)
+					{
+						LoadMessage = "Loading tilesets...\n" +
+							"Tileset " + tileset.Name + ", gid: " + gid;
+					}
 				}
 			}
 
@@ -85,7 +90,7 @@ namespace BrTiledLoader
 				if (layer.Properties.ContainsKey("draw_priority"))
 					float.TryParse(layer.Properties["draw_priority"], out drawPriority);
 
-				outMap.AddLayer(layer.Name, new TiledLayer(layer.Name, drawPriority, new TiledTileInstance[map.Width, map.Height], layer.Properties));
+				outMap.AddLayer(layer.Name, new TiledLayer(layer.Name, drawPriority, (float)layer.OffsetY, (float)layer.OffsetX, allTiles, new TiledLayer.TileType[map.Width, map.Height], layer.Properties));
 
 				LoadMessage = "Blanking tiles...";
 				int iter = 0;
@@ -95,8 +100,12 @@ namespace BrTiledLoader
 					for (int y = 0; y < map.Height; y++)
 					{
 						iter++;
-						outMap.SetTile(layer.Name, new Point(x, y), new TiledTileInstance(null, new Point(x, y), layer.Name));
-						LoadMessage = "Blanking tiles...\n(Layer: " + layer.Name + " (" + layerIndex + "/" + (map.Layers.Count - 1) + ") " + iter + "/" + layer.Tiles.Count + ")";
+						outMap.SetTile(layer.Name, new Point(x, y), null);
+
+						if (outputLoadMessage)
+						{
+							LoadMessage = "Blanking tiles...\n(Layer: " + layer.Name + " (" + layerIndex + "/" + (map.Layers.Count - 1) + ") " + iter + "/" + layer.Tiles.Count + ")";
+						}
 					}
 				}
 
@@ -110,8 +119,13 @@ namespace BrTiledLoader
 					if (layerTile.Gid != 0 && allTiles.ContainsKey(layerTile.Gid))
 					{
 						iter++;
-						outMap.SetTile(layer.Name, new Point(layerTile.X, layerTile.Y), new TiledTileInstance(allTiles[layerTile.Gid], new Point(layerTile.X, layerTile.Y), layer.Name));
-						LoadMessage = "Initializing tiles...\n(Layer: " + layer.Name + " (" + layerIndex + "/" + (map.Layers.Count - 1) + ") " + iter + "/" + layer.Tiles.Count + ")";
+						outMap.SetTile(layer.Name, new Point(layerTile.X, layerTile.Y), allTiles[layerTile.Gid]);
+
+						if (outputLoadMessage)
+						{
+							LoadMessage = "Initializing tiles...\n(Layer: " + layer.Name + " (" + layerIndex + "/" + (map.Layers.Count - 1) + ") " + iter + "/" + layer.Tiles.Count + ")";
+						}
+
 						continue;
 					}
 				}
@@ -128,7 +142,7 @@ namespace BrTiledLoader
 				{
 					TiledObject newObj = new TiledObject();
 					newObj.LoadObj(obj);
-					outMap.tiledObjects.Add(newObj);
+					outMap.Objects.Add(newObj);
 				}
 			}
 		}

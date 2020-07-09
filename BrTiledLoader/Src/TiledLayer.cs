@@ -9,21 +9,35 @@ namespace BrTiledLoader
 {
 	public class TiledLayer
 	{
+		public struct TileType
+		{
+			public short id;
+		}
+
 		public string name;
 		public float drawPriority;
-		public TiledTileInstance[,] tiles;
+		//public TiledTileInstance[,] tiles;
+		public TileType[,] tiles;
+
+		public float offsetVertical;
+		public float offsetHorizontal;
 
 		public Dictionary<string, string> properties;
+
+		private Dictionary<int, TiledTile> tileDefinitions;
 
 		public TiledLayer()
 		{
 
 		}
 
-		public TiledLayer(string name, float drawPriority, TiledTileInstance[,] tiles, Dictionary<string, string> properties)
+		public TiledLayer(string name, float drawPriority, float offsetVertical, float offsetHorizontal, Dictionary<int, TiledTile> tileDefinitions, TileType[,] tiles, Dictionary<string, string> properties)
 		{
 			this.name = name;
 			this.drawPriority = drawPriority;
+			this.offsetVertical = offsetVertical;
+			this.offsetHorizontal = offsetHorizontal;
+			this.tileDefinitions = tileDefinitions;
 			this.tiles = tiles;
 
 			this.properties = new Dictionary<string, string>();
@@ -41,26 +55,27 @@ namespace BrTiledLoader
 		{
 			if (pos.X >= 0 && pos.X < tiles.GetLength(0) && pos.Y >= 0 && pos.Y < tiles.GetLength(1))
 			{
-				TiledTileInstance tile = tiles[pos.X, pos.Y];
-				return tile != null;
+				TiledTileInstance tile = GetTile(pos);
+				return tile.valid;
 			}
 			return false;
 		}
 
-		/// <summary>
-		/// A blank tile instance is:
-		/// A tile that is not invalid, and
-		/// Does not have a tile attached to it.
-		/// </summary>
-		/// <returns>False if the tile is invalid or the tile is not blank. True if the tile is valid and blank.</returns>
-		public bool IsBlankTile(Point pos)
-		{
-			return IsValidTile(pos) && GetTile(pos).tile == null;
-		}
-
 		public TiledTileInstance GetTile(Point pos)
 		{
-			return tiles[pos.X, pos.Y];
+			if (pos.X < 0 || pos.X > tiles.GetLength(0) || pos.Y < 0 || pos.Y >= tiles.GetLength(1))
+			{
+				//TODO log this
+				return default;
+			}
+
+			int definition = tiles[pos.X, pos.Y].id;
+
+			//return invalid tile if definition is 0
+			//we have to manually handle this case since tileDefinitions doesn't keep track of the 0 index tile, since it would be null
+			if (definition == 0)
+				return default;
+			else return new TiledTileInstance(tileDefinitions[definition], pos, name);
 		}
 	}
 }

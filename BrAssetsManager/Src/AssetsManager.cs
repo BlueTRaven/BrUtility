@@ -25,6 +25,14 @@ namespace BrAssetsManager
 		public abstract void AddAssetTypes(ContentManager contentManager);
 
 		#region get assets
+		public virtual void LoadAsset<T>(string name)
+		{
+			if (assetTypes.ContainsKey(typeof(T)) && assetTypes[typeof(T)].assets.ContainsKey(name))
+			{
+				assetTypes[typeof(T)].LoadAsset(name);
+			}
+		}
+
 		/// <summary>
 		/// Gets asset of type <typeparamref name="T"/> with name <paramref name="name"/>, if it exists.
 		/// </summary>
@@ -120,16 +128,6 @@ namespace BrAssetsManager
 
 					string[] split = file.DirectoryName.Split('\\');
 					int index = split.ToList().IndexOf("Content");
-					string dirName = "";
-
-					try
-					{
-						dirName = split[index + indexAdd];
-					}
-					catch
-					{
-						dirName = split[index];
-					}
 
 					string directory = "";
 					for (int i = index + 1; i < split.Length; i++)
@@ -144,7 +142,7 @@ namespace BrAssetsManager
 					{
 						string assetDirectory = assetType.directoryName;
 
-						if (directory == assetDirectory || directory.StartsWith(assetDirectory))
+						if (file.Extension == assetType.extentionName && (directory == assetDirectory || directory.StartsWith(assetDirectory)))
 						{
 							assetType.SetAssetReference(name, directory + "/" + name, fulldirectoryname);
 						}

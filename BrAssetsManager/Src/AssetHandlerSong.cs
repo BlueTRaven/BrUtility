@@ -13,5 +13,17 @@ namespace BrAssetsManager
 		public AssetHandlerSong(ContentManager contentManager, AssetsManager assetsManager) : base(".xnb", "Sounds/Songs", contentManager, assetsManager)
 		{
 		}
+
+		public override object GetAsset(string key)
+		{
+			
+			return base.GetAsset(key);
+		}
+
+		public override void LoadAsset(string key)
+		{
+			//TODO: if audio cannot be loaded - i.e. audio hardware isn't present - handle exception explicitly, don't load.
+			base.LoadAsset(key);
+		}
 	}
 }

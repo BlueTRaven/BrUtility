@@ -248,10 +248,7 @@ namespace BrDialogue
 
 		public string CurrentDialogueFullText()
 		{
-			return "";	//TODO fix this. Taylor 11/17/19
-			//Added scaling functionality to basically everything in TextHelper, which required swapping over to using FontInfo (a wrapper for SpriteFont) instead of a SpriteFont.
-			//This class needs to be updated to use a FontInfo instead of SpriteFont.
-			//return TextHelper.WrapText(font, currentDialogueSet.GetDialogue(), Width * pixelScale);
+			return TextHelper.WrapText(new TextHelper.FontInfo(font, 1, true), currentDialogueSet.GetDialogue(), Width * pixelScale);
 		}
 
 		public void Draw(SpriteBatch batch)
@@ -395,10 +392,10 @@ namespace BrDialogue
 				}
 			}
 
-			batch.Draw(font.Texture, position + new Vector2(-2, 0), sourceRect.ToRectangle(), outlineColor, 0, Vector2.Zero, 1, SpriteEffects.None, drawDepth - 0.01f);
+			/*batch.Draw(font.Texture, position + new Vector2(-2, 0), sourceRect.ToRectangle(), outlineColor, 0, Vector2.Zero, 1, SpriteEffects.None, drawDepth - 0.01f);
 			batch.Draw(font.Texture, position + new Vector2(2, 0), sourceRect.ToRectangle(), outlineColor, 0, Vector2.Zero, 1, SpriteEffects.None, drawDepth - 0.01f);
 			batch.Draw(font.Texture, position + new Vector2(0, -2), sourceRect.ToRectangle(), outlineColor, 0, Vector2.Zero, 1, SpriteEffects.None, drawDepth - 0.01f);
-			batch.Draw(font.Texture, position + new Vector2(0, 2), sourceRect.ToRectangle(), outlineColor, 0, Vector2.Zero, 1, SpriteEffects.None, drawDepth - 0.01f);
+			batch.Draw(font.Texture, position + new Vector2(0, 2), sourceRect.ToRectangle(), outlineColor, 0, Vector2.Zero, 1, SpriteEffects.None, drawDepth - 0.01f);*/
 
 			batch.Draw(font.Texture, position, sourceRect.ToRectangle(), color, 0, Vector2.Zero, 1, SpriteEffects.None, drawDepth);
 		}

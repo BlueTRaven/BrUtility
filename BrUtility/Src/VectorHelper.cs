@@ -9,7 +9,7 @@ namespace BlueRavenUtility
 {
     public static class VectorHelper
     {
-		public static Vector2 VectorToAngle(float angle, bool radians = true)
+		public static Vector2 AngleToVector(float angle, bool radians = true)
 		{
 			if (!radians)
 				angle = MathHelper.ToRadians(angle);
