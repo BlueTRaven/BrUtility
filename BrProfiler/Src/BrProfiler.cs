@@ -1,4 +1,5 @@
-﻿using BrUtility.Src;
+﻿using BlueRavenUtility;
+using BrUtility.Src;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BrProfiler
 {
-	public class BrProfiler
+	public static class BrProfiler
 	{
 		public ref struct ProfileResult
 		{
@@ -46,15 +47,30 @@ namespace BrProfiler
 		}
 
 		//fast list supports ref indexing
-		private FastList<ProfileSnippet> snippets = new FastList<ProfileSnippet>();
+		private static FastList<ProfileSnippet> snippets = new FastList<ProfileSnippet>();
 
-		public void StartProfiling()
+		private static bool started;
+
+		public static void StartProfiling()
 		{
+			if (started)
+			{
+				Logger.GetLogger("Profiler").Log(Logger.LogLevel.Error, "Cannot start profiling as profiling was already started.");
+				return;
+			}
+
 			snippets.Clear();
+			started = true;
 		}
 
-		public ProfileResult EndProfiling()
+		public static ProfileResult EndProfiling()
 		{
+			if (!started)
+			{
+				Logger.GetLogger("Profiler").Log(Logger.LogLevel.Error, "StartProfiling must be called before EndProfiling can be called.");
+				return default;
+			}
+
 			ProfileResult result = new ProfileResult();
 			result.iterableSnippets = snippets;
 			result.snippetsByName = new Dictionary<string, ProfileSnippet>();
@@ -63,15 +79,49 @@ namespace BrProfiler
 			{
 				result.snippetsByName.Add(snippets[i].name, snippets[i]);
 			}
-			
+
+			started = false;
 			return result;
 		}
 
-		public void StartSnippet(string name)
+		public static void StartSnippet(string name)
 		{
+			if (!started)
+			{
+				Logger.GetLogger("Profiler").Log(Logger.LogLevel.Error, "StartProfiling must be called before StartSnippet can be called.");
+				return;
+			}
+
 			ProfileSnippet snippet = new ProfileSnippet(name);
 			snippets.Add(snippet);
 			snippet.Start();
 		}
-    }
+
+		public static void EndSnippet(string name)
+		{
+			if (!started)
+			{
+				Logger.GetLogger("Profiler").Log(Logger.LogLevel.Error, "StartProfiling must be called before EndSnippet can be called.");
+				return;
+			}
+
+			bool foundAny = false;
+
+			for (int i = 0; i < snippets.Length; i++)
+			{
+				if (snippets[i].name == name)
+				{
+					snippets[i].Stop();
+					foundAny = true;
+					break;
+				}
+			}
+
+			if (!foundAny)
+			{
+				Logger.GetLogger("Profiler").Log(Logger.LogLevel.Error, "Tried to end snippet with name " + name + ", but no snippet with that name exists. Did you typo or forget a StartSnippet?");
+			}
+		}
+
+	}
 }
