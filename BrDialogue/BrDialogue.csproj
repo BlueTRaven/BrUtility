@@ -46,15 +46,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Src\AssetHandlerDialogue.cs" />
     <Compile Include="Src\Dialogue.cs" />
-    <Compile Include="Src\DialogueChooser.cs" />
-    <Compile Include="Src\DialogueChooserInput.cs" />
     <Compile Include="Src\DialogueEffect.cs" />
     <Compile Include="Src\DialogueEffectInstance.cs" />
     <Compile Include="Src\DialogueManager.cs" />
-    <Compile Include="Src\DialogueManagerRW.cs" />
     <Compile Include="Src\DialogueSet.cs" />
     <Compile Include="Src\DialogueSetInstance.cs" />
-    <Compile Include="Src\DialogueUpdater.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BrAssetsManager\BrAssetsManager.csproj">
