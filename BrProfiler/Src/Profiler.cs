@@ -12,9 +12,41 @@ namespace BrProfiler
 {
 	public static class Profiler
 	{
-		public ref struct ProfileResult
+		public struct ProfileResult
 		{
-			public Dictionary<string, TimeSpan> timespans;
+			public readonly string name;
+			public readonly FastList<ProfileSnippetResult> snippetTree;
+
+			public ProfileResult(string name, FastList<ProfileSnippetResult> snippetTree)
+			{
+				this.name = name;
+				this.snippetTree = snippetTree;
+			}
+		}
+
+		public class ProfileSnippetResult
+		{
+			public readonly string name;
+			public TimeSpan elapsedTime;
+
+			public ProfileSnippetResult parent;
+			public FastList<ProfileSnippetResult> children;
+
+			public ProfileSnippetResult(string name, ProfileSnippetResult parent, TimeSpan elapsedTime)
+			{
+				this.name = name;
+				this.parent = parent;
+				this.children = null;
+				this.elapsedTime = elapsedTime;
+			}
+
+			public void AddChild(ProfileSnippetResult child)
+			{
+				if (children == null)
+					children = new FastList<ProfileSnippetResult>();
+
+				children.Add(child);
+			}
 		}
 
 		public class ProfileSnippet : IPoolable
@@ -24,9 +56,12 @@ namespace BrProfiler
 
 			internal bool started;
 
-			internal void Start(string name)
+			internal string parent;
+
+			internal void Start(string name, string parent = null)
 			{
 				this.name = name;
+				this.parent = parent;
 				watch = Stopwatch.StartNew();
 				started = true;
 			}
@@ -60,19 +95,24 @@ namespace BrProfiler
 		//fast list supports ref indexing
 		private static FastList<ProfileSnippet> snippets = new FastList<ProfileSnippet>();
 		private static Dictionary<string, ProfileSnippet> snippetsByName = new Dictionary<string, ProfileSnippet>();
+		private static Stack<string> startedSnippets = new Stack<string>();
 
+		private static string name;
 		private static bool started;
 
-		public static void StartProfiling()
+		public static void StartProfiling(string name)
 		{
+			Logger.GetOrCreate("Profiler");
+
 			if (started)
 			{
-				Logger.GetLogger("Profiler").Log(Logger.LogLevel.Error, "Cannot start profiling as profiling was already started.");
+				Logger.GetLogger("Profiler").Log(Logger.LogLevel.Error, "Tried to start profiling, but profiling was already started as " + name + ".");
 				return;
 			}
 
 			snippets.Clear();
 			started = true;
+			Profiler.name = name;
 		}
 
 		public static ProfileResult EndProfiling()
@@ -83,20 +123,49 @@ namespace BrProfiler
 				return default;
 			}
 
-			ProfileResult result = new ProfileResult();
-			result.timespans = new Dictionary<string, TimeSpan>();
-
-			for (int i = 0; i < snippets.Length; i++)
-			{
-				result.timespans.Add(snippets[i].name, snippets[i].GetTime());
-				pooledSnippets.Return(snippets[i]);
-			}
+			ProfileResult result = new ProfileResult(name, BuildTree());
 
 			snippets.Clear();
 			snippetsByName.Clear();
+			startedSnippets.Clear();
 
 			started = false;
 			return result;
+		}
+
+		private static FastList<ProfileSnippetResult> BuildTree()
+		{
+			FastList<ProfileSnippetResult> rootNodes = new FastList<ProfileSnippetResult>();
+
+			//Start from root nodes (nodes with no parents.)
+			//Loop through all nodes. if those nodes have the same parent name as the current node, then add them to the list of children of that node.
+			
+			for (int i = 0; i < snippets.Length; i++)
+			{
+				if (snippets[i].parent == null)
+				{
+					ProfileSnippetResult result = new ProfileSnippetResult(snippets[i].name, null, snippets[i].GetTime());
+					rootNodes.Add(result);
+
+					SearchForChildren(result);
+				}
+			}
+
+			return rootNodes;
+		}
+
+		private static void SearchForChildren(ProfileSnippetResult parentSearch)
+		{
+			for (int i = 0; i < snippets.Length; i++)
+			{
+				if (snippets[i].parent == parentSearch.name)
+				{
+					ProfileSnippetResult result = new ProfileSnippetResult(snippets[i].name, parentSearch, snippets[i].GetTime());
+					parentSearch.AddChild(result);
+
+					SearchForChildren(result);
+				}
+			}
 		}
 
 		public static void StartSnippet(string name)
@@ -110,10 +179,12 @@ namespace BrProfiler
 			ProfileSnippet snippet = pooledSnippets.Get();
 			snippets.Add(snippet);
 			snippetsByName.Add(name, snippet);
-			snippet.Start(name);
+			
+			snippet.Start(name, startedSnippets.Count > 0 ? startedSnippets.Peek() : null);
+			startedSnippets.Push(name);
 		}
 
-		public static void EndSnippet(string name)
+		public static void EndSnippet()
 		{
 			if (!started)
 			{
@@ -121,12 +192,16 @@ namespace BrProfiler
 				return;
 			}
 
+			string name = startedSnippets.Pop();
+			
 			if (snippetsByName.ContainsKey(name))
 			{
 				if (!snippetsByName[name].started)
 				{
 					Logger.GetLogger("Profiler").Log(Logger.LogLevel.Error, "Tried to end snippet with name " + name + ", but this snippet has not been started yet.");
+					return;
 				}
+
 				snippetsByName[name].Stop();
 			}
 			else
