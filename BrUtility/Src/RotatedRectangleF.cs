@@ -21,7 +21,8 @@ namespace BlueRavenUtility
 			get
 			{
 				Vector2 topLeft = new Vector2(baseRectangle.Left, baseRectangle.Top);
-				return RotatePoint(topLeft, topLeft + origin, rotation);
+				RotatePoint(ref topLeft, topLeft + origin, rotation);
+				return topLeft;
 			}
 		}
 
@@ -41,7 +42,8 @@ namespace BlueRavenUtility
 			{
 				Vector2 topLeft = new Vector2(baseRectangle.Left, baseRectangle.Top);
 				Vector2 topRight = new Vector2(baseRectangle.Right, baseRectangle.Top);
-				return RotatePoint(topRight, topLeft + origin, rotation);
+				RotatePoint(ref topRight, topLeft + origin, rotation);
+				return topRight;
 			}
 		}
 
@@ -61,7 +63,8 @@ namespace BlueRavenUtility
 			{
 				Vector2 topLeft = new Vector2(baseRectangle.Left, baseRectangle.Top);
 				Vector2 bottomLeft = new Vector2(baseRectangle.Left, baseRectangle.Bottom);
-				return RotatePoint(bottomLeft, topLeft + origin, rotation);
+				RotatePoint(ref bottomLeft, topLeft + origin, rotation);
+				return bottomLeft;
 			}
 		}
 
@@ -81,7 +84,8 @@ namespace BlueRavenUtility
 			{
 				Vector2 topLeft = new Vector2(baseRectangle.Left, baseRectangle.Top);
 				Vector2 bottomRight = new Vector2(baseRectangle.Right, baseRectangle.Bottom);
-				return RotatePoint(bottomRight, topLeft + origin, rotation);
+				RotatePoint(ref bottomRight, topLeft + origin, rotation);
+				return bottomRight;
 			}
 		}
 
@@ -97,6 +101,22 @@ namespace BlueRavenUtility
 		[JsonIgnore]
 		public Vector2 Center { get { return baseRectangle.Center; } }
 
+		[JsonIgnore]
+		public RectangleF BoundaryRectangle
+		{
+			get
+			{
+				float minX = MathHelper.Min(MathHelper.Min(TopLeft.X, TopRight.X), MathHelper.Min(BottomLeft.X, BottomRight.X));
+				float minY = MathHelper.Min(MathHelper.Min(TopLeft.Y, TopRight.Y), MathHelper.Min(BottomLeft.Y, BottomRight.Y));
+				float maxX = MathHelper.Max(MathHelper.Max(TopLeft.X, TopRight.X), MathHelper.Max(BottomLeft.X, BottomRight.X));
+				float maxY = MathHelper.Max(MathHelper.Max(TopLeft.Y, TopRight.Y), MathHelper.Max(BottomLeft.Y, BottomRight.Y));
+
+				float width = maxX - minX;
+				float height = maxY - minY;
+				return new RectangleF(minX, minY, width, height);
+			}
+		}
+
 		public RotatedRectangleF(RectangleF rectangle, float initialRotation, Vector2? origin = null)
 		{
 			this.baseRectangle = rectangle;
@@ -105,6 +125,10 @@ namespace BlueRavenUtility
 			if (origin == null)
 				this.origin = new Vector2(rectangle.width / 2, rectangle.height / 2);
 			else this.origin = origin.Value;
+
+			//TODO: can we get rid of this allocation entirely? Array.Min/Max is way too convenient...
+			thisScalars = new float[4];
+			otherScalars = new float[4];
 		}
 
 		public RotatedRectangleF Offset(Vector2 offsetBy)
@@ -114,31 +138,28 @@ namespace BlueRavenUtility
 
 		public bool Intersects(RotatedRectangleF rectangle)
 		{
-			Vector2[] axes = new Vector2[4];
+			Vector2 axisTop = TopRight - TopLeft;
+			Vector2 axisRight = TopRight - BottomRight;
+			Vector2 axisOTop = rectangle.TopRight - rectangle.TopLeft;
+			Vector2 axisORight = rectangle.TopRight - rectangle.BottomRight;
 
-			axes[0] = TopRight - TopLeft;
-			axes[1] = TopRight - BottomRight;
-			axes[2] = rectangle.TopLeft - rectangle.BottomLeft;
-			axes[3] = rectangle.TopLeft - rectangle.TopRight;
-
-			foreach (Vector2 axis in axes)
-			{
-				if (!IsAxisColliding(rectangle, axis))
-					return false;
-			}
-
-			return true;
+			if (!IsAxisColliding(rectangle, axisTop) ||
+				!IsAxisColliding(rectangle, axisRight) ||
+				!rectangle.IsAxisColliding(this, axisOTop) ||
+				!rectangle.IsAxisColliding(this, axisORight))
+				return false;
+			else return true;
 		}
 
-		private bool IsAxisColliding(RotatedRectangleF rectangle, Vector2 axis)
+		private float[] thisScalars;
+		private float[] otherScalars;
+		public bool IsAxisColliding(RotatedRectangleF rectangle, Vector2 axis)
 		{
-			float[] thisScalars = new float[4];
 			thisScalars[0] = Vector2.Dot(TopLeft, axis);
 			thisScalars[1] = Vector2.Dot(TopRight, axis);
 			thisScalars[2] = Vector2.Dot(BottomLeft, axis);
 			thisScalars[3] = Vector2.Dot(BottomRight, axis);
 
-			float[] otherScalars = new float[4];
 			otherScalars[0] = Vector2.Dot(rectangle.TopLeft, axis);
 			otherScalars[1] = Vector2.Dot(rectangle.TopRight, axis);
 			otherScalars[2] = Vector2.Dot(rectangle.BottomLeft, axis);
@@ -150,19 +171,18 @@ namespace BlueRavenUtility
 			float otherRectMin = otherScalars.Min();
 			float otherRectMax = otherScalars.Max();
 
-			if (thisRectMin <= otherRectMax && thisRectMax >= otherRectMax)
+			if (thisRectMax >= otherRectMax && thisRectMin <= otherRectMax)
 				return true;
 
-			if (otherRectMin <= thisRectMax && otherRectMax >= thisRectMax)
+			if (otherRectMax >= thisRectMax && otherRectMin <= thisRectMax)
 				return true;
 
 			return false;
 		}
 
-		private Vector2 RotatePoint(Vector2 point, Vector2 origin, float rotation)
+		private void RotatePoint(ref Vector2 point, in Vector2 origin, in float rotation)
 		{
-			Vector2 rotated = Vector2.Transform(point - origin, Matrix.CreateRotationZ(rotation)) + origin;
-			return rotated;
+			point = Vector2.Transform(point - origin, Matrix.CreateRotationZ(rotation)) + origin;
 		}
 	}
 }
