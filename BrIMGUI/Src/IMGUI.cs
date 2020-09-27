@@ -1,5 +1,5 @@
 ﻿using A1r.Input;
-using BlueRavenUtility;
+using BrUtility;
 using BrIMGUI.Content;
 using BrNineSlice;
 using Microsoft.Xna.Framework;

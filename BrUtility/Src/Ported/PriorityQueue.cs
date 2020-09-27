@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlueRavenUtility.Ported
+namespace BrUtility.Ported
 {
 	public class PriorityQueue<T>
 	{	//super simple implementation of a priority queue. not at *all* optimized.

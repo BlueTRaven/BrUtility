@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
 
-namespace BlueRavenUtility
+namespace BrUtility
 {
     public struct RectangleF
     {
