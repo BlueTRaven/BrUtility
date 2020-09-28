@@ -26,5 +26,25 @@ namespace BrUtility
 
 			this.condition = condition;
 		}
+
+		public static void AssertTrue(bool condition, string message, Logger.LogLevel logLevel)
+		{
+			new Assert(condition, message, logLevel);
+		}
+
+		public static void AssertTrue(bool condition)
+		{
+			new Assert(condition, "Condition Was False.", Logger.LogLevel.Error);
+		}
+
+		public static void AssertNotNull(object obj, string message, Logger.LogLevel logLevel)
+		{
+			new Assert(obj != null, message, logLevel);
+		}
+
+		public static void AssertNotNull(object obj)
+		{
+			new Assert(obj != null, "Object Was Null.", Logger.LogLevel.Error);
+		}
 	}
 }

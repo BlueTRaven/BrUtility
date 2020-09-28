@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 //Taken and modified from a static version elsewhere.
 //I believe the original code came from dcrew.
 
-namespace BrUtility.QuadTreeSystem
+namespace BrUtility.DataStructures
 {
 	public class QuadTree<T> where T : IAABB
 	{

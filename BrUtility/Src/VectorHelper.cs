@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using BrUtility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -17,9 +17,9 @@ namespace BlueRavenUtility
 			return new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
 		}
 
-		public static Vector2 RotateBy(this Vector2 vector, float degrees)
+		public static Vector2 RotateBy(this Vector2 vector, Angle angle)
         {
-            var temp = Vector2.Transform(vector, Matrix.CreateRotationZ(MathHelper.ToRadians(degrees)));
+            var temp = Vector2.Transform(vector, Matrix.CreateRotationZ(angle.Radians));
             vector.X = temp.X;
             vector.Y = temp.Y;
             return vector;

@@ -24,6 +24,24 @@ namespace BlueRavenUtility
 		}
 		#endregion
 
+		public static void Union(this Rectangle rect, Rectangle other)
+		{
+			Rectangle union = Rectangle.Union(rect, other);
+			rect.X = union.X;
+			rect.Y = union.Y;
+			rect.Width = union.Width;
+			rect.Height = union.Height;
+		}
+
+		public static void Union(this Rectangle rect, Point other)
+		{
+			Rectangle union = Rectangle.Union(rect, new Rectangle(other, Point.Zero));
+			rect.X = union.X;
+			rect.Y = union.Y;
+			rect.Width = union.Width;
+			rect.Height = union.Height;
+		}
+
 		public static RectangleF ToRectangleF(this Rectangle rect)
         {
             return new RectangleF(rect.X, rect.Y, rect.Width, rect.Height);

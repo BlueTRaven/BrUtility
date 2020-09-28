@@ -321,5 +321,37 @@ namespace BlueRavenUtility
 					return new Vector2(0, 0);
 			}
 		}
+
+		public static DirectionCardinal Reverse(DirectionCardinal direction)
+		{
+			switch (direction)
+			{
+				case DirectionCardinal.West:
+					return DirectionCardinal.East;
+				case DirectionCardinal.North:
+					return DirectionCardinal.South;
+				case DirectionCardinal.East:
+					return DirectionCardinal.West;
+				case DirectionCardinal.South:
+					return DirectionCardinal.North;
+				default: return DirectionCardinal.North;
+			}
+		}
+
+		public static DirectionCardinalG Reverse(DirectionCardinalG direction)
+		{
+			switch (direction)
+			{
+				case DirectionCardinalG.Left:
+					return DirectionCardinalG.Right;
+				case DirectionCardinalG.Up:
+					return DirectionCardinalG.Down;
+				case DirectionCardinalG.Right:
+					return DirectionCardinalG.Left;
+				case DirectionCardinalG.Down:
+					return DirectionCardinalG.Up;
+				default: return DirectionCardinalG.Up;
+			}
+		}
 	}
 }
