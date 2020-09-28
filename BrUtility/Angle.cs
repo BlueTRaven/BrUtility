@@ -16,6 +16,7 @@ namespace BrUtility
 		public float Degrees { get { return MathHelper.ToDegrees(radians); } set { radians = EngineMathHelper.Mod(MathHelper.ToRadians(value), MathHelper.Pi * 2); } }
 
 		public Enums.DirectionCardinal Direction => GetDirection(Degrees);
+		public Vector2 Vector => new Vector2((float)Math.Cos(radians), (float)Math.Sin(radians));
 
 		public static Angle Zero => FromRadians(0);
 
@@ -59,7 +60,7 @@ namespace BrUtility
 
 		public static Enums.DirectionCardinal GetDirection(float degrees)
 		{
-			if ((degrees >= 315 && degrees < 360) || (degrees >= 0 && degrees < 45))
+			if ((degrees >= 315 && degrees <= 360) || (degrees >= 0 && degrees < 45))
 				return Enums.DirectionCardinal.East;
 			else if (degrees >= 45 && degrees < 135)
 				return Enums.DirectionCardinal.North;
@@ -104,6 +105,29 @@ namespace BrUtility
 			return FromDegrees(thisAngle.Degrees - otherAngleDegrees);
 		}
 
+		#region right-hand vs float/double
+		public static Angle operator +(float otherAngleRadians, Angle thisAngle)
+		{
+			return FromRadians(otherAngleRadians + thisAngle.radians);
+		}
+
+		public static Angle operator -(float otherAngleRadians, Angle thisAngle)
+		{
+			return FromRadians(otherAngleRadians - thisAngle.Radians);
+		}
+
+		public static Angle operator +(double otherAngleRadians, Angle thisAngle)
+		{
+			return (float)otherAngleRadians + thisAngle;    //float addition since we already use floats
+		}
+
+		public static Angle operator -(double otherAngleRadians, Angle thisAngle)
+		{
+			return (float)otherAngleRadians - thisAngle;
+		}
+		#endregion
+
+		#region left-hand vs float/double
 		/// <summary>
 		/// Angle + float is radians addition, because floats are more likely to be radians.
 		/// </summary>
@@ -129,6 +153,8 @@ namespace BrUtility
 		{
 			return thisAngle - (float)otherAngleRadians;
 		}
+		#endregion
+
 		#endregion
 	}
 }
