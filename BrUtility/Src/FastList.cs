@@ -100,7 +100,7 @@ namespace BrUtility.Src
 		/// </summary>
 		public void RemoveAt(int index)
 		{
-			new Assert(index < Length, "Index out of range!", BlueRavenUtility.Logger.LogLevel.Error);
+			new Assert(index < Length, "Index out of range!", BrUtility.Logger.LogLevel.Error);
 
 			Length--;
 			if (index < Length)
@@ -115,7 +115,7 @@ namespace BrUtility.Src
 		/// <param name="index">Index.</param>
 		public void RemoveAtWithSwap(int index)
 		{
-			new Assert(index < Length, "Index out of range!", BlueRavenUtility.Logger.LogLevel.Error);
+			new Assert(index < Length, "Index out of range!", BrUtility.Logger.LogLevel.Error);
 
 			Buffer[index] = Buffer[Length - 1];
 			Buffer[Length - 1] = default(T);

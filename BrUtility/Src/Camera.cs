@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace BlueRavenUtility
+namespace BrUtility
 {
     /// <summary>
     /// The way the camera moves to the target position.

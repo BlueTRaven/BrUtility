@@ -45,7 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Angle.cs" />
+    <Compile Include="Src\Angle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Src\AnimationSystem\Animation.cs" />
     <Compile Include="Src\AnimationSystem\Frame.cs" />

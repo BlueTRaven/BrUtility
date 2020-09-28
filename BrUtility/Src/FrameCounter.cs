@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlueRavenUtility
+namespace BrUtility
 {
 	public class FrameCounter
 	{   //Taken from https://stackoverflow.com/questions/20676185/xna-monogame-getting-the-frames-per-second

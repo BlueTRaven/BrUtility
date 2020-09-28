@@ -1,4 +1,4 @@
-﻿using BlueRavenUtility;
+﻿using BrUtility;
 using BrNineSlice;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

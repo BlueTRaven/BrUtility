@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlueRavenUtility
+namespace BrUtility
 {
     public static class Utility
     {
@@ -30,7 +30,7 @@ namespace BlueRavenUtility
         {
             if (!setup)
             {
-                throw new Exception("BlueRavenUtility has not been correctly setup! Use Utility.Setup!");
+                throw new Exception("BrUtility has not been correctly setup! Use Utility.Setup!");
             }
         }
 
