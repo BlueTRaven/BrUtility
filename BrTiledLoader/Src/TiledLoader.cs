@@ -55,6 +55,8 @@ namespace BrTiledLoader
 			outMap.tileWidth = map.TileWidth;
 			outMap.tileHeight = map.TileHeight;
 
+			outMap.backgroundColor = new Color(map.BackgroundColor.R, map.BackgroundColor.G, map.BackgroundColor.B, 255);
+
 			return outMap;
 		}
 
@@ -119,7 +121,7 @@ namespace BrTiledLoader
 					if (layerTile.Gid != 0 && allTiles.ContainsKey(layerTile.Gid))
 					{
 						iter++;
-						outMap.SetTile(layer.Name, new Point(layerTile.X, layerTile.Y), allTiles[layerTile.Gid]);
+						outMap.SetTile(layer.Name, new Point(layerTile.X, layerTile.Y), allTiles[layerTile.Gid], layerTile.HorizontalFlip, layerTile.VerticalFlip);
 
 						if (outputLoadMessage)
 						{
@@ -143,6 +145,7 @@ namespace BrTiledLoader
 					TiledObject newObj = new TiledObject();
 					newObj.LoadObj(obj);
 					outMap.Objects.Add(newObj);
+					outMap.ObjectsById.Add(obj.Id, newObj);
 				}
 			}
 		}

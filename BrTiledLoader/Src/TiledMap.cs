@@ -12,11 +12,15 @@ namespace BrTiledLoader
 		public Rectangle bounds;
 		
 		public List<TiledObject> Objects { get; private set; } = new List<TiledObject>();
+		public Dictionary<int, TiledObject> ObjectsById { get; private set; } = new Dictionary<int, TiledObject>();
 
 		public Dictionary<string, TiledLayer> Layers { get; private set; } = new Dictionary<string, TiledLayer>();
+		public TiledLayer[] IterableLayers { get; private set; }
 
 		public int width, height;
 		public int tileWidth, tileHeight;
+
+		public Color backgroundColor;
 
 		public TiledMap()
 		{
@@ -39,6 +43,7 @@ namespace BrTiledLoader
 		public void AddLayer(string name, TiledLayer layer)
 		{
 			Layers.Add(name, layer);
+			IterableLayers = Layers.Values.ToArray();
 		}
 
 		public bool HasLayer(string name)
@@ -58,11 +63,20 @@ namespace BrTiledLoader
 			return Layers.Values.ToList();
 		}
 
-		public void SetTile(string layer, Point pos, TiledTile tileType)
+		public void SetTile(string layer, Point pos, TiledTile tileType, bool flipH = false, bool flipV = false)
 		{
 			if (tileType == null)
 				Layers[layer].tiles[pos.X, pos.Y] = default;
-			else Layers[layer].tiles[pos.X, pos.Y] = new TiledLayer.TileType() { id = (short)tileType.gid };
+			else
+			{
+				TiledLayer.TileType.Flip flip = TiledLayer.TileType.Flip.FLIP_NONE;
+				if (flipH)
+					flip |= TiledLayer.TileType.Flip.FLIP_H;
+				if (flipV)
+					flip |= TiledLayer.TileType.Flip.FLIP_V;
+
+				Layers[layer].tiles[pos.X, pos.Y] = new TiledLayer.TileType() { id = (short)tileType.gid, flip = flip };
+			}
 		}
 
 		public TiledTileInstance GetTile(string layer, Point pos)

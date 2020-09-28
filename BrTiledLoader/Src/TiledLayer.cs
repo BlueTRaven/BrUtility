@@ -11,7 +11,16 @@ namespace BrTiledLoader
 	{
 		public struct TileType
 		{
+			//for extra packing
+			public enum Flip : byte
+			{
+				FLIP_NONE = 0,
+				FLIP_H = 1 << 0,
+				FLIP_V = 1 << 1,
+				FLIP_D = FLIP_H | FLIP_V
+			}
 			public short id;
+			public Flip flip;
 		}
 
 		public string name;
@@ -63,19 +72,20 @@ namespace BrTiledLoader
 
 		public TiledTileInstance GetTile(Point pos)
 		{
-			if (pos.X < 0 || pos.X > tiles.GetLength(0) || pos.Y < 0 || pos.Y >= tiles.GetLength(1))
+			if (pos.X < 0 || pos.X >= tiles.GetLength(0) || pos.Y < 0 || pos.Y >= tiles.GetLength(1))
 			{
 				//TODO log this
 				return default;
 			}
 
 			int definition = tiles[pos.X, pos.Y].id;
+			TileType.Flip flip = tiles[pos.X, pos.Y].flip;
 
 			//return invalid tile if definition is 0
 			//we have to manually handle this case since tileDefinitions doesn't keep track of the 0 index tile, since it would be null
 			if (definition == 0)
 				return default;
-			else return new TiledTileInstance(tileDefinitions[definition], pos, name);
+			else return new TiledTileInstance(tileDefinitions[definition], pos, name, flip);
 		}
 	}
 }

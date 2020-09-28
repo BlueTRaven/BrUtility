@@ -13,6 +13,7 @@ namespace BrTiledLoader
 		public string layer;
 		public Dictionary<string, string> properties;
 
+		public int id;
 		public string name;
 		public string objType;
 
@@ -24,6 +25,7 @@ namespace BrTiledLoader
 
 		public void LoadObj(TmxObject obj)
 		{
+			this.id = obj.Id;
 			this.name = obj.Name;
 			position = new RectangleF((float)obj.X, (float)obj.Y, (float)obj.Width, (float)obj.Height);
 

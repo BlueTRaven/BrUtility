@@ -15,11 +15,15 @@ namespace BrTiledLoader
 
 		public bool valid;
 
-		public TiledTileInstance(TiledTile tile, Point position, string layer)
+		public TiledLayer.TileType.Flip flip;
+
+		public TiledTileInstance(TiledTile tile, Point position, string layer, TiledLayer.TileType.Flip flip)// = TiledLayer.TileType.Flip.FLIP_NONE)
 		{
 			this.tile = tile;
 			this.position = position;
 			this.layer = layer;
+
+			this.flip = flip;
 
 			valid = true;
 		}
