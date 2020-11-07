@@ -27,5 +27,7 @@ namespace BrTiledLoader
 
 			valid = true;
 		}
+
+		public static TiledTileInstance Invalid => new TiledTileInstance();
 	}
 }

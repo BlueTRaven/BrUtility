@@ -1,4 +1,5 @@
 ﻿using BrUtility;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -68,6 +69,26 @@ namespace BrTiledLoader
 		{
 			if (properties.ContainsKey(name))
 				return properties[name];
+			else return def;
+		}
+
+		public Color GetPropertyColor(string name, Color def)
+		{
+			if (properties.ContainsKey(name))
+			{
+				string str = properties[name].Substring(1);
+				string aStr = str.Substring(0, 2);
+				string rStr = str.Substring(2, 2);
+				string gStr = str.Substring(4, 2);
+				string bStr = str.Substring(6, 2);
+
+				int.TryParse(rStr, System.Globalization.NumberStyles.HexNumber, null, out int r);
+				int.TryParse(gStr, System.Globalization.NumberStyles.HexNumber, null, out int g);
+				int.TryParse(bStr, System.Globalization.NumberStyles.HexNumber, null, out int b);
+				int.TryParse(aStr, System.Globalization.NumberStyles.HexNumber, null, out int a);
+
+				return new Color(r, g, b, a);
+			}
 			else return def;
 		}
 

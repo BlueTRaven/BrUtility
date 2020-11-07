@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Src\AssetHandlerTiledMap.cs" />
+    <Compile Include="Src\PropertyHelper.cs" />
     <Compile Include="Src\TiledLayer.cs" />
     <Compile Include="Src\TiledLoader.cs" />
     <Compile Include="Src\TiledMap.cs" />

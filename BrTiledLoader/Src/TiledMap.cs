@@ -17,6 +17,8 @@ namespace BrTiledLoader
 		public Dictionary<string, TiledLayer> Layers { get; private set; } = new Dictionary<string, TiledLayer>();
 		public TiledLayer[] IterableLayers { get; private set; }
 
+		public Dictionary<string, string> Properties = new Dictionary<string, string>();
+
 		public int width, height;
 		public int tileWidth, tileHeight;
 

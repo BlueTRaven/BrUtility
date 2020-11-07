@@ -42,6 +42,8 @@ namespace BrTiledLoader
 		{
 			TiledMap outMap = new TiledMap();
 
+			PropertyHelper.CopyProperties(outMap.Properties, map.Properties);
+
 			LoadMessage = "loading tiles...";
 			LoadTiles(map, outMap);
 			LoadMessage = "loading objects...";
@@ -54,6 +56,8 @@ namespace BrTiledLoader
 
 			outMap.tileWidth = map.TileWidth;
 			outMap.tileHeight = map.TileHeight;
+
+			outMap.Properties = map.Properties;
 
 			outMap.backgroundColor = new Color(map.BackgroundColor.R, map.BackgroundColor.G, map.BackgroundColor.B, 255);
 

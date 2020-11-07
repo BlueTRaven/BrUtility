@@ -90,7 +90,7 @@ namespace BrUtility
 
         public bool Contains(Vector2 point)
         {
-            return point.X >= x && point.X <= x + width && point.Y >= y && point.Y <= y + height;
+            return point.X >= x && point.X < x + width && point.Y >= y && point.Y < y + height;
         }
 
         public RectangleF Expand(float byVal)
