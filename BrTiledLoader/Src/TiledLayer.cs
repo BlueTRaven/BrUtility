@@ -19,7 +19,7 @@ namespace BrTiledLoader
 				FLIP_V = 1 << 1,
 				FLIP_D = FLIP_H | FLIP_V
 			}
-			public short id;
+			public ushort id;
 			public Flip flip;
 		}
 
@@ -27,13 +27,16 @@ namespace BrTiledLoader
 		public float drawPriority;
 		//public TiledTileInstance[,] tiles;
 		public TileType[,] tiles;
+		private int tilesWidth;
+		private int tilesHeight;
 
 		public float offsetVertical;
 		public float offsetHorizontal;
 
 		public Dictionary<string, string> properties;
 
-		private Dictionary<int, TiledTile> tileDefinitions;
+		//private Dictionary<int, TiledTile> tileDefinitions;
+		private TiledTile[] tileDefinitions;
 
 		public TiledLayer()
 		{
@@ -46,8 +49,17 @@ namespace BrTiledLoader
 			this.drawPriority = drawPriority;
 			this.offsetVertical = offsetVertical;
 			this.offsetHorizontal = offsetHorizontal;
-			this.tileDefinitions = tileDefinitions;
+			//this.tileDefinitions = tileDefinitions;
 			this.tiles = tiles;
+			this.tilesWidth = tiles.GetLength(0);
+			this.tilesHeight = tiles.GetLength(1);
+
+			this.tileDefinitions = new TiledTile[tileDefinitions.Max(x => x.Key)];
+
+			foreach (int definition in tileDefinitions.Keys)
+			{
+				this.tileDefinitions[definition - 1] = tileDefinitions[definition];
+			}
 
 			this.properties = new Dictionary<string, string>();
 
@@ -70,22 +82,31 @@ namespace BrTiledLoader
 			return false;
 		}
 
+		private TiledTile cachedTile;
+		private int cachedDefinition;
+
 		public TiledTileInstance GetTile(Point pos)
 		{
-			if (pos.X < 0 || pos.X >= tiles.GetLength(0) || pos.Y < 0 || pos.Y >= tiles.GetLength(1))
+			if (pos.X < 0 || pos.X >= tilesWidth || pos.Y < 0 || pos.Y >= tilesHeight)
 			{
 				//TODO log this
 				return default;
 			}
 
-			int definition = tiles[pos.X, pos.Y].id;
-			TileType.Flip flip = tiles[pos.X, pos.Y].flip;
-
 			//return invalid tile if definition is 0
 			//we have to manually handle this case since tileDefinitions doesn't keep track of the 0 index tile, since it would be null
-			if (definition == 0)
+			if (tiles[pos.X, pos.Y].id == 0)
 				return default;
-			else return new TiledTileInstance(tileDefinitions[definition], pos, name, flip);
+			else
+			{
+				if (cachedTile == null || cachedDefinition != tiles[pos.X, pos.Y].id)
+				{
+					cachedTile = tileDefinitions[tiles[pos.X, pos.Y].id - 1];
+					cachedDefinition = tiles[pos.X, pos.Y].id;
+				}
+
+				return new TiledTileInstance(cachedTile, pos, name, tiles[pos.X, pos.Y].flip);
+			}
 		}
 	}
 }

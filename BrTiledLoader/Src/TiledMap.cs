@@ -75,7 +75,7 @@ namespace BrTiledLoader
 				if (flipV)
 					flip |= TiledLayer.TileType.Flip.FLIP_V;
 
-				Layers[layer].tiles[pos.X, pos.Y] = new TiledLayer.TileType() { id = (short)tileType.gid, flip = flip };
+				Layers[layer].tiles[pos.X, pos.Y] = new TiledLayer.TileType() { id = (ushort)tileType.gid, flip = flip };
 			}
 		}
 
