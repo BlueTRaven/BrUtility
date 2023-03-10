@@ -6,10 +6,20 @@ using System.Threading.Tasks;
 
 namespace BrUtility
 {
+	public interface IPool<T> where T : IPoolable
+    {
+		T Get();
+
+		void Return(T item);
+	}
+
 	public interface IPoolable
 	{
-		void OnGet<T>(GenericPool<T> pool) where T : IPoolable;
+		bool IsUsed { get; set; }
+		int PoolIndex { get; set; }
 
-		void OnReturned<T>(GenericPool<T> pool) where T : IPoolable;
+		void OnGet<T>(IPool<T> pool) where T : IPoolable;
+
+		void OnReturned<T>(IPool<T> pool) where T : IPoolable;
 	}
 }

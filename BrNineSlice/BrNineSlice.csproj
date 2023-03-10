@@ -59,8 +59,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MonoGame.Framework.DesktopGL.Core">
-      <Version>3.8.0.2</Version>
+    <PackageReference Include="MonoGame.Framework.DesktopGL" PrivateAssets="All">
+      <Version>3.8.0.1641</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>12.0.3</Version>

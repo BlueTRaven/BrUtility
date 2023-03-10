@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 using BrUtility;
+using Microsoft.Xna.Framework;
 
 namespace BrNineSlice
 {
@@ -26,9 +27,29 @@ namespace BrNineSlice
 			if (deserialized == null)
 				Logger.GetOrCreate("BrUtility").Log(Logger.LogLevel.Error, "Could not load a nine slice asset by name of " + assets[key].fileName + ". Is the file missing, or is the json incorrect?");
 
-			var sizeSer = deserialized.size.Split(',');
-			Size size = new Size(float.Parse(sizeSer[0]), float.Parse(sizeSer[1]));
-			NineSlice slice = new NineSlice(assetManager.GetAsset<Texture2D>(deserialized.texture), size, 
+			Vector2 position = Vector2.Zero;
+			if (deserialized.position.Where(x => x == ',').Count() == 1)
+			{
+				var posSer = deserialized.size.Split(',');
+
+				float.TryParse(posSer[0], out float px);
+				float.TryParse(posSer[1], out float py);
+
+				position = new Vector2(px, py);
+			}
+
+			Size size = Size.Zero;
+			if (deserialized.size.Where(x => x == ',').Count() == 1)
+			{
+				var sizeSer = deserialized.size.Split(',');
+
+				float.TryParse(sizeSer[0], out float sx);
+				float.TryParse(sizeSer[1], out float sy);
+
+				size = new Size(sx, sy);
+			}
+
+			NineSlice slice = new NineSlice(assetManager.GetAsset<Texture2D>(deserialized.texture), position, size, 
 				deserialized.distLeft, deserialized.distRight, deserialized.distTop, deserialized.distBottom);
 			assets[key].asset = slice;
 		}

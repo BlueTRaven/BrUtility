@@ -19,8 +19,9 @@ namespace BrNineSlice
 			Stretch,
 		}
 
-		public static NineSlice Empty { get { return new NineSlice(null, Size.Zero, 0); } }
-		
+		public static NineSlice Empty { get { return new NineSlice(null, Vector2.Zero, Size.Zero, 0); } }
+
+		public Vector2 position;
 		public Size size;
 		
 		public float distLeft;
@@ -31,18 +32,18 @@ namespace BrNineSlice
 		public DrawMode drawMode;
 
 		#region Properties
-		public RectangleF CornerTopLeft => new RectangleF(0, 0, distLeft, distTop);
-		public RectangleF CornerTopRight => new RectangleF(size.Width - distRight, 0, distRight, distTop);
-		public RectangleF CornerBottomLeft => new RectangleF(0, size.Height - distBottom, distLeft, distBottom);
-		public RectangleF CornerBottomRight => new RectangleF(size.Width - distRight, size.Height - distBottom, distRight, distBottom);
+		public RectangleF CornerTopLeft => new RectangleF(position.X, position.Y, distLeft, distTop);
+		public RectangleF CornerTopRight => new RectangleF(position.X + size.Width - distRight, position.Y, distRight, distTop);
+		public RectangleF CornerBottomLeft => new RectangleF(position.X, position.Y + size.Height - distBottom, distLeft, distBottom);
+		public RectangleF CornerBottomRight => new RectangleF(position.X + size.Width - distRight, position.Y + size.Height - distBottom, distRight, distBottom);
 
-		public RectangleF EdgeLeft => new RectangleF(0, distTop, distLeft, size.Height - (distBottom + distTop));
-		public RectangleF EdgeRight => new RectangleF(size.Width - distRight, distTop, distRight, size.Height - (distBottom + distTop));
+		public RectangleF EdgeLeft => new RectangleF(position.X, position.Y + distTop, distLeft, size.Height - (distBottom + distTop));
+		public RectangleF EdgeRight => new RectangleF(position.X + size.Width - distRight, position.Y + distTop, distRight, size.Height - (distBottom + distTop));
 
-		public RectangleF EdgeTop => new RectangleF(distLeft, 0, size.Width - (distRight + distLeft), distTop);
-		public RectangleF EdgeBottom => new RectangleF(distLeft, size.Height - distBottom, size.Width - (distRight + distLeft), distBottom);
+		public RectangleF EdgeTop => new RectangleF(position.X + distLeft, position.Y, size.Width - (distRight + distLeft), distTop);
+		public RectangleF EdgeBottom => new RectangleF(position.X + distLeft, position.Y + size.Height - distBottom, size.Width - (distRight + distLeft), distBottom);
 
-		public RectangleF Center => new RectangleF(distLeft, distTop, size.Width - (distRight + distLeft), size.Height - (distBottom + distTop));
+		public RectangleF Center => new RectangleF(position.X + distLeft, position.Y + distTop, size.Width - (distRight + distLeft), size.Height - (distBottom + distTop));
 
 		public float InnerWidth => size.Width - (distRight + distLeft);
 		public float InnerHeight => size.Height - (distTop + distBottom);
@@ -63,8 +64,9 @@ namespace BrNineSlice
 		private Texture2D texture;
 		private bool hasTextures;
 
-		public NineSlice(Texture2D texture, Size size, float distance, DrawMode drawMode = DrawMode.Tile)
+		public NineSlice(Texture2D texture, Vector2 position, Size size, float distance, DrawMode drawMode = DrawMode.Tile)
 		{
+			this.position = position;
 			this.size = size;
 			this.distLeft = distance;
 			this.distRight = distance;
@@ -77,7 +79,7 @@ namespace BrNineSlice
 				GetTextures(texture);
 		}
 
-		public NineSlice(Texture2D texture, Size size, float distLeft, float distRight, float distTop, float distBottom, DrawMode drawMode = DrawMode.Tile)
+		public NineSlice(Texture2D texture, Vector2 position, Size size, float distLeft, float distRight, float distTop, float distBottom, DrawMode drawMode = DrawMode.Tile)
 		{
 			this.size = size;
 			this.distLeft = distLeft;
@@ -134,14 +136,6 @@ namespace BrNineSlice
 
 			finalTex.SetData(finalColors.ToArray());
 			finalTex.Name = texture.Name.Replace('/', '-') + "-" + type;
-
-			/*if (!Directory.Exists("debug/"))
-				Directory.CreateDirectory("debug/");
-
-			using (FileStream fs = File.Create("debug/output_debug_" + (texture.Name.Replace('/', '-')) + "-" + type + ".png"))
-			{
-				finalTex.SaveAsPng(fs, finalTex.Width, finalTex.Height);
-			}/**/
 
 			return finalTex;
 		}

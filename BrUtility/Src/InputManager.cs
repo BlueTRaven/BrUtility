@@ -89,6 +89,8 @@ namespace A1r.Input
 
 		private Dictionary<string, int> repeatedKeys = new Dictionary<string, int>();
 
+		public bool InputCaptured;	//input is being captured by something else
+
 		public InputManager(Game game) : base(game)
 		{
 			gamepadIndices = new List<int>();
@@ -109,7 +111,7 @@ namespace A1r.Input
 
 		public override void Update(GameTime gameTime)
 		{
-			if (!Game.IsActive)	//process no input while not active
+			if (!Game.IsActive || InputCaptured)	//process no input while not active
 				return;
 
 			// Save the one and only (if available) keyboardstate 

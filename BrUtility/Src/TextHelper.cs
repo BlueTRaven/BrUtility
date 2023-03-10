@@ -61,6 +61,13 @@ namespace BrUtility
 
 		private static RasterizerState scissorTestRasterizerState = new RasterizerState() { ScissorTestEnable = true };
 
+		public struct DrawnText
+        {
+			public Vector2 position;
+			public Rectangle bounds;
+			public string wrappedText;
+        }
+
 		/// <summary>
 		/// Draws text indside the given bounds.
 		/// </summary>
@@ -71,41 +78,41 @@ namespace BrUtility
 		/// <param name="overflowAction">Defines what happens when the text overflows on the Y axis (i.e. goes out of bounds.)</param>
 		public static void DrawText(SpriteBatch batch, FontInfo fontText, string text, Color color, Rectangle bounds, Enums.Alignment alignment, int wrapWidth, float drawDepth = 0, OverFlowAction overflowAction = OverFlowAction.DontDrawOverflow)
 		{
-			RasterizerState oldRasterizerState = batch.GraphicsDevice.RasterizerState;
+			WrappedText wrappedText = new WrappedText()
+			{
+				text = text,
+				wrapWidth = wrapWidth
+			};
 
-			//SpriteFont font = fontText.font;
-
+			//If wrapWidth is -1, don't wrap the text.
 			if (wrapWidth != -1)
-				text = WrapText(fontText, text, wrapWidth);
-
-			Vector2 size = fontText.StringSize(text).ToVector2();
-			if (size.Y > bounds.Size.Y && overflowAction == OverFlowAction.DontDrawAny)
-				return;
+				wrappedText = GetWrappedText(fontText, text, wrapWidth);
 
 			Vector2 alignmentOffset = GetAlignmentOffset(fontText, text, bounds, alignment);
 
-			if (overflowAction == OverFlowAction.DontDrawOverflow)
-			{   //this might cause issues later down the line. Idk.
-				batch.End();
-				batch.Begin(SpriteSortMode.Immediate, batch.GraphicsDevice.BlendState, batch.GraphicsDevice.SamplerStates[0], batch.GraphicsDevice.DepthStencilState, scissorTestRasterizerState, null, null);
+			DrawText(batch, fontText, wrappedText, alignmentOffset, color, bounds, drawDepth, overflowAction);
+		}
 
-				//batch.GraphicsDevice.RasterizerState = scissorTestRasterizerState;
-				batch.GraphicsDevice.ScissorRectangle = bounds;
-			}
+		public struct WrappedText
+        {
+			public float wrapWidth;
+			public string text;
+        }
 
-			RecreateDrawString(batch, bounds.Location.ToVector2() + alignmentOffset, fontText, text, drawDepth, color);
+		public static void DrawText(SpriteBatch batch, FontInfo fontText, WrappedText wrappedText, Vector2 alignmentOffset, Color color, Rectangle bounds, float drawDepth = 0, OverFlowAction overflowAction = OverFlowAction.DontDrawOverflow)
+		{
+			//If wrapWidth is -1, don't wrap the text.
+			Vector2 size = fontText.StringSize(wrappedText.text).ToVector2();
+			if (size.Y > bounds.Size.Y && overflowAction == OverFlowAction.DontDrawAny)
+				return;
+
+			RecreateDrawString(batch, bounds.Location.ToVector2() + alignmentOffset, fontText, wrappedText.text, drawDepth, color);
 
 			if (debugDrawTextBounds)
 			{
 				batch.DrawHollowRectangle(bounds, 1, Color.Red, 1);
-				bounds.Width = wrapWidth;
+				bounds.Width = (int)wrappedText.wrapWidth;
 				batch.DrawHollowRectangle(bounds, 1, Color.Pink, 1);
-			}
-
-			if (overflowAction == OverFlowAction.DontDrawOverflow)
-			{
-				batch.End();
-				batch.Begin(SpriteSortMode.Immediate, batch.GraphicsDevice.BlendState, batch.GraphicsDevice.SamplerStates[0], batch.GraphicsDevice.DepthStencilState, oldRasterizerState, null, null);
 			}
 		}
 
@@ -234,10 +241,21 @@ namespace BrUtility
 			else return Vector2.Zero;
 		}
 
+		public static WrappedText GetWrappedText(FontInfo fontInfo, string text, float lineWidth)
+        {
+			return new WrappedText()
+			{
+				text = WrapText(fontInfo, text, lineWidth),
+				wrapWidth = lineWidth,
+			};
+        }
+
+		const string space = " ";
+		static string[] splitTextBy = new string[] { space };
+
 		public static string WrapText(FontInfo font, string text, float lineWidth)
 		{
-			const string space = " ";
-			string[] words = text.Split(new string[] { space }, StringSplitOptions.None);
+			string[] words = text.Split(splitTextBy, StringSplitOptions.RemoveEmptyEntries);
 			float spaceWidth = font.StringWidth(space),
 				spaceLeft = lineWidth, 
 				wordWidth = 0;

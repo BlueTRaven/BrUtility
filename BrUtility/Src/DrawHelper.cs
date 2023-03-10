@@ -35,11 +35,18 @@ namespace BrUtility
 
 		public static void LoadContent(GraphicsDevice graphics)
 		{
-			Texture2D whitePixel = new Texture2D(graphics, 1, 1);
+			whitePixel = new Texture2D(graphics, 1, 1);
 			whitePixel.SetData(new Color[] { Color.White });
+            whitePixel.Name = "Whitepixel";
 
-			WhitePixel = whitePixel;
-		}
+            blackPixel = new Texture2D(graphics, 1, 1);
+            blackPixel.SetData(new Color[] { Color.Black });
+            blackPixel.Name = "Blackpixel";
+
+            transparentPixel = new Texture2D(graphics, 1, 1);
+            transparentPixel.SetData(new Color[] { new Color(0, 0, 0, 0) });
+            transparentPixel.Name = "TransparentPixel";
+        }
 
         internal static Texture2D whitePixel;
         public static Texture2D WhitePixel
@@ -52,8 +59,32 @@ namespace BrUtility
 			}
 			set { whitePixel = value; }
 		}
-		
-		public static BlendState CopyBlendState(BlendState copy)
+
+		internal static Texture2D blackPixel;
+		public static Texture2D BlackPixel
+        {
+            get
+            {
+                if (blackPixel != null)
+                    return blackPixel;
+                else throw new Exception("DrawHelper has not been initialized. Call DrawHelper.Initialize in your LoadContent override.");
+            }
+            set { blackPixel = value; }
+        }
+
+        internal static Texture2D transparentPixel;
+        public static Texture2D TransparentPixel
+        {
+            get
+            {
+                if (transparentPixel != null)
+                    return transparentPixel;
+                else throw new Exception("DrawHelper has not been initialized. Call DrawHelper.Initialize in your LoadContent override.");
+            }
+            set { transparentPixel = value; }
+        }
+
+        public static BlendState CopyBlendState(BlendState copy)
 		{
 			BlendState blendState = new BlendState()
 			{

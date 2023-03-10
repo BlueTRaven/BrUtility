@@ -24,6 +24,11 @@ namespace BrUtility
 		}
 		#endregion
 
+        public static Vector3 ToVector3(this Vector4 vector)
+        {
+            return new Vector3(vector.X, vector.Y, vector.Z) / vector.W;
+        }
+
 		public static void Union(this Rectangle rect, Rectangle other)
 		{
 			Rectangle union = Rectangle.Union(rect, other);

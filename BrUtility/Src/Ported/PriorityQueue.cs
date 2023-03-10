@@ -21,10 +21,20 @@ namespace BrUtility.Ported
 			this.determinePriorityFunc = determinePriorityFunc;
 		}
 
+		public void EnqueueWithoutSorting(T obj)
+		{
+			objs.Add(obj);
+		}
+
 		public void Enqueue(T obj)
 		{
 			objs.Add(obj);
 
+			Sort();
+		}
+
+		public void Sort()
+		{
 			if (firstOut)
 				objs = objs.OrderBy(determinePriorityFunc).ToList();
 			else objs = objs.OrderByDescending(determinePriorityFunc).ToList();

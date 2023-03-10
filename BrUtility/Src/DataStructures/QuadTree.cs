@@ -111,6 +111,9 @@ namespace BrUtility.DataStructures
 		{
 			const int CAPACITY = 8;
 
+			public bool IsUsed { get; set; }
+			public int PoolIndex { get; set; }
+
 			public Rectangle Bounds { get; internal set; }
 
 			public int Count
@@ -299,12 +302,14 @@ namespace BrUtility.DataStructures
 						yield return i;
 			}
 
-			void IPoolable.OnGet<T1>(GenericPool<T1> pool)
+			void IPoolable.OnGet<T1>(IPool<T1> pool)
 			{
+				IsUsed = true;
 			}
 
-			void IPoolable.OnReturned<T1>(GenericPool<T1> pool)
+			void IPoolable.OnReturned<T1>(IPool<T1> pool)
 			{
+				IsUsed = false;
 				items.Clear();
 
 				var castPool = pool as GenericPool<Node>;

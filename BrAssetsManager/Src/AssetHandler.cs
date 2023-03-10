@@ -58,10 +58,12 @@ namespace BrAssetsManager
 
 		public virtual object GetAsset(string key)
 		{
-			if (!assets[key].loadedAsset)
+			Asset asset = assets[key];
+
+			if (!asset.loadedAsset)
 				LoadAsset(key);
 
-			return assets[key].asset;
+			return asset.asset;
 		}
 	}
 }

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BrUtility.Src
+namespace BrUtility
 {
 	/// <summary>
 	/// very basic wrapper around an array that auto-expands it when it reaches capacity. Note that when iterating it should be done

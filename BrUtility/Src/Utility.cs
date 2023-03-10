@@ -34,6 +34,13 @@ namespace BrUtility
             }
         }
 
+		public static bool HasAttribute(Type attributeType, Type objType)
+		{
+			var attrs = objType.GetCustomAttributes(attributeType);
+
+			return attrs.Count() > 0;
+		}
+
 		public static Type GetType(string name)
 		{
 			foreach (Assembly assemb in AppDomain.CurrentDomain.GetAssemblies())
@@ -47,6 +54,18 @@ namespace BrUtility
 
 			return null;
 		}
+
+		public static Type GetType(string assemblyName, string name)
+		{
+			Assembly ass = Assembly.Load(assemblyName);
+            foreach (Type type in ass.GetTypes())
+            {
+                if (type.Name == name || type.FullName == name)
+                    return type;
+            }
+
+			return null;
+        }
 
 		public static List<Type> GetTypes<T>(bool withAbstract = false)
 		{
