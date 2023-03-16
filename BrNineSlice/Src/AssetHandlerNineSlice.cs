@@ -49,7 +49,7 @@ namespace BrNineSlice
 				size = new Size(sx, sy);
 			}
 
-			NineSlice slice = new NineSlice(assetManager.GetAsset<Texture2D>(deserialized.texture), position, size, 
+			NineSlice slice = new NineSlice(assetManager.GetAsset<Texture2D>(deserialized.texture), new RectangleF(position, size), 
 				deserialized.distLeft, deserialized.distRight, deserialized.distTop, deserialized.distBottom);
 			assets[key].asset = slice;
 		}

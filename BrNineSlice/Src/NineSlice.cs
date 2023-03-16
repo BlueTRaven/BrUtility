@@ -19,10 +19,9 @@ namespace BrNineSlice
 			Stretch,
 		}
 
-		public static NineSlice Empty { get { return new NineSlice(null, Vector2.Zero, Size.Zero, 0); } }
+		public static NineSlice Empty { get { return new NineSlice(null, RectangleF.Empty, 0); } }
 
-		public Vector2 position;
-		public Size size;
+		public RectangleF SourceRect;
 		
 		public float distLeft;
 		public float distRight;
@@ -32,21 +31,21 @@ namespace BrNineSlice
 		public DrawMode drawMode;
 
 		#region Properties
-		public RectangleF CornerTopLeft => new RectangleF(position.X, position.Y, distLeft, distTop);
-		public RectangleF CornerTopRight => new RectangleF(position.X + size.Width - distRight, position.Y, distRight, distTop);
-		public RectangleF CornerBottomLeft => new RectangleF(position.X, position.Y + size.Height - distBottom, distLeft, distBottom);
-		public RectangleF CornerBottomRight => new RectangleF(position.X + size.Width - distRight, position.Y + size.Height - distBottom, distRight, distBottom);
+		public RectangleF CornerTopLeft => new RectangleF(SourceRect.x, SourceRect.y, distLeft, distTop);
+		public RectangleF CornerTopRight => new RectangleF(SourceRect.x + SourceRect.width - distRight, SourceRect.y, distRight, distTop);
+		public RectangleF CornerBottomLeft => new RectangleF(SourceRect.x, SourceRect.y + SourceRect.height - distBottom, distLeft, distBottom);
+		public RectangleF CornerBottomRight => new RectangleF(SourceRect.x + SourceRect.width - distRight, SourceRect.y + SourceRect.height - distBottom, distRight, distBottom);
 
-		public RectangleF EdgeLeft => new RectangleF(position.X, position.Y + distTop, distLeft, size.Height - (distBottom + distTop));
-		public RectangleF EdgeRight => new RectangleF(position.X + size.Width - distRight, position.Y + distTop, distRight, size.Height - (distBottom + distTop));
+		public RectangleF EdgeLeft => new RectangleF(SourceRect.x, SourceRect.y + distTop, distLeft, SourceRect.height - (distBottom + distTop));
+		public RectangleF EdgeRight => new RectangleF(SourceRect.x + SourceRect.width - distRight, SourceRect.y + distTop, distRight, SourceRect.height - (distBottom + distTop));
 
-		public RectangleF EdgeTop => new RectangleF(position.X + distLeft, position.Y, size.Width - (distRight + distLeft), distTop);
-		public RectangleF EdgeBottom => new RectangleF(position.X + distLeft, position.Y + size.Height - distBottom, size.Width - (distRight + distLeft), distBottom);
+		public RectangleF EdgeTop => new RectangleF(SourceRect.x + distLeft, SourceRect.y, SourceRect.width - (distRight + distLeft), distTop);
+		public RectangleF EdgeBottom => new RectangleF(SourceRect.x + distLeft, SourceRect.y + SourceRect.height - distBottom, SourceRect.width - (distRight + distLeft), distBottom);
 
-		public RectangleF Center => new RectangleF(position.X + distLeft, position.Y + distTop, size.Width - (distRight + distLeft), size.Height - (distBottom + distTop));
+		public RectangleF Center => new RectangleF(SourceRect.x + distLeft, SourceRect.y + distTop, SourceRect.width - (distRight + distLeft), SourceRect.height - (distBottom + distTop));
 
-		public float InnerWidth => size.Width - (distRight + distLeft);
-		public float InnerHeight => size.Height - (distTop + distBottom);
+		public float InnerWidth => SourceRect.width - (distRight + distLeft);
+		public float InnerHeight => SourceRect.height - (distTop + distBottom);
 
 		public Texture2D TexTopLeft { get; private set; }
 		public Texture2D TexTopRight { get; private set; }
@@ -64,10 +63,9 @@ namespace BrNineSlice
 		private Texture2D texture;
 		private bool hasTextures;
 
-		public NineSlice(Texture2D texture, Vector2 position, Size size, float distance, DrawMode drawMode = DrawMode.Tile)
+		public NineSlice(Texture2D texture, RectangleF sourceRect, float distance, DrawMode drawMode = DrawMode.Tile)
 		{
-			this.position = position;
-			this.size = size;
+			this.SourceRect = sourceRect;
 			this.distLeft = distance;
 			this.distRight = distance;
 			this.distTop = distance;
@@ -79,9 +77,10 @@ namespace BrNineSlice
 				GetTextures(texture);
 		}
 
-		public NineSlice(Texture2D texture, Vector2 position, Size size, float distLeft, float distRight, float distTop, float distBottom, DrawMode drawMode = DrawMode.Tile)
+		public NineSlice(Texture2D texture, RectangleF sourceRect, float distLeft, float distRight, float distTop, float distBottom, DrawMode drawMode = DrawMode.Tile)
 		{
-			this.size = size;
+			this.SourceRect = sourceRect;
+
 			this.distLeft = distLeft;
 			this.distRight = distRight;
 			this.distTop = distTop;
