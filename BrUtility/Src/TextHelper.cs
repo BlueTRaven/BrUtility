@@ -78,17 +78,13 @@ namespace BrUtility
 		/// <param name="overflowAction">Defines what happens when the text overflows on the Y axis (i.e. goes out of bounds.)</param>
 		public static void DrawText(SpriteBatch batch, FontInfo fontText, string text, Color color, Rectangle bounds, Enums.Alignment alignment, int wrapWidth, float drawDepth = 0, OverFlowAction overflowAction = OverFlowAction.DontDrawOverflow)
 		{
-			WrappedText wrappedText = new WrappedText()
-			{
-				text = text,
-				wrapWidth = wrapWidth
-			};
+			WrappedText wrappedText = new WrappedText(wrapWidth, text);
 
 			//If wrapWidth is -1, don't wrap the text.
 			if (wrapWidth != -1)
 				wrappedText = GetWrappedText(fontText, text, wrapWidth);
 
-			Vector2 alignmentOffset = GetAlignmentOffset(fontText, text, bounds, alignment);
+			Vector2 alignmentOffset = GetAlignmentOffset(fontText, text, wrappedText.offset, wrappedText.length, bounds, alignment);
 
 			DrawText(batch, fontText, wrappedText, alignmentOffset, color, bounds, drawDepth, overflowAction);
 		}
@@ -97,6 +93,16 @@ namespace BrUtility
         {
 			public float wrapWidth;
 			public string text;
+			public int offset;
+			public int length;
+
+			public WrappedText(float wrapWidth, string text, int offset = 0, int length = -1)
+			{
+				this.wrapWidth = wrapWidth;
+				this.text = text;
+				this.offset = offset;
+				this.length = length == -1 ? text.Length : length;
+			}
         }
 
 		public static void DrawText(SpriteBatch batch, FontInfo fontText, WrappedText wrappedText, Vector2 alignmentOffset, Color color, Rectangle bounds, float drawDepth = 0, OverFlowAction overflowAction = OverFlowAction.DontDrawOverflow)
@@ -106,7 +112,8 @@ namespace BrUtility
 			if (size.Y > bounds.Size.Y && overflowAction == OverFlowAction.DontDrawAny)
 				return;
 
-			RecreateDrawString(batch, bounds.Location.ToVector2() + alignmentOffset, fontText, wrappedText.text, drawDepth, color);
+			RecreateDrawString(batch, bounds.Location.ToVector2() + alignmentOffset, fontText, 
+				wrappedText.text, wrappedText.offset, wrappedText.length, drawDepth, color);
 
 			if (debugDrawTextBounds)
 			{
@@ -128,13 +135,13 @@ namespace BrUtility
 			}
 		}
 
-		private static void RecreateDrawString(SpriteBatch batch, Vector2 position, FontInfo font, string text, float drawDepth, Color color)
+		private static void RecreateDrawString(SpriteBatch batch, Vector2 position, FontInfo font, string text, int textOffset, int textLength, float drawDepth, Color color)
 		{
 			Vector2 offset = Vector2.Zero;
 			bool firstGlyphOfLine = true;
 
 			var glyphs = font.font.GetGlyphs();
-			for (int i = 0; i < text.Length; i++)
+			for (int i = textOffset; i < textOffset + textLength; i++)
 			{
 				char character = text[i];
 
@@ -195,7 +202,7 @@ namespace BrUtility
 
 		public static Vector2 GetLastCharacterPosition(FontInfo fontInfo, string text, Rectangle bounds, Enums.Alignment alignment)
 		{
-			Vector2 alignmentOffset = GetAlignmentOffset(fontInfo, text, bounds, alignment);
+			Vector2 alignmentOffset = GetAlignmentOffset(fontInfo, text, 0, text.Length, bounds, alignment);
 			Vector2 drawPosition = bounds.Location.ToVector2() + alignmentOffset;
 
 			string wrapped = WrapText(fontInfo, text, bounds.Width);
@@ -210,10 +217,11 @@ namespace BrUtility
 			return drawPosition + new Vector2(xpos, ypos);
 		}
 
-		public static Vector2 GetAlignmentOffset(FontInfo font, string text, Rectangle bounds, Enums.Alignment alignment)
+		public static Vector2 GetAlignmentOffset(FontInfo font, string text, int offset, int length, Rectangle bounds, Enums.Alignment alignment)
 		{
+			//TODO: remove text.Substring. This is an allocation that I don't want!
 			Vector2 size = Vector2.Zero;
-			try { size = font.StringSize(text).ToVector2(); }
+			try { size = font.StringSize(text.Substring(offset, length)).ToVector2(); }
 			catch
 			{
 				Logger.GetOrCreate("BrUtility").Log(Logger.LogLevel.Error, "Text has no size (empty or invalid string.)");
@@ -241,13 +249,9 @@ namespace BrUtility
 			else return Vector2.Zero;
 		}
 
-		public static WrappedText GetWrappedText(FontInfo fontInfo, string text, float lineWidth)
+		public static WrappedText GetWrappedText(FontInfo fontInfo, string text, float lineWidth, int offset = 0, int length = -1)
         {
-			return new WrappedText()
-			{
-				text = WrapText(fontInfo, text, lineWidth),
-				wrapWidth = lineWidth,
-			};
+			return new WrappedText(lineWidth, text, offset, length);
         }
 
 		const string space = " ";
@@ -256,9 +260,10 @@ namespace BrUtility
 		public static string WrapText(FontInfo font, string text, float lineWidth)
 		{
 			string[] words = text.Split(splitTextBy, StringSplitOptions.RemoveEmptyEntries);
-			float spaceWidth = font.StringWidth(space),
-				spaceLeft = lineWidth, 
-				wordWidth = 0;
+			float spaceWidth = font.StringWidth(space);
+			float spaceRemaining = lineWidth;
+			float wordWidth;
+
 			StringBuilder result = new StringBuilder();
 
 			foreach (string word in words)
@@ -277,21 +282,21 @@ namespace BrUtility
 						
 						wordWidth = font.StringWidth(newlineWord);
 
-						if (wordWidth + spaceWidth > spaceLeft)
+						if (wordWidth + spaceWidth > spaceRemaining)
 						{
 							result.AppendLine();
-							spaceLeft = lineWidth - wordWidth;
+							spaceRemaining = lineWidth - wordWidth;
 						}
 						else
 						{
-							spaceLeft -= (wordWidth + spaceWidth);
+							spaceRemaining -= (wordWidth + spaceWidth);
 						}
 
 						if (i != 0)
 						{
 							result.AppendLine();
 							result.Append(newlineWord + space);
-							spaceLeft = lineWidth - wordWidth;  //this is setting to the previous word's length not the new one
+							spaceRemaining = lineWidth - wordWidth;  //this is setting to the previous word's length not the new one
 						}
 						else
 						{
@@ -300,14 +305,14 @@ namespace BrUtility
 					}
 					continue;   //we don't want to reach the end because reasons
 				}
-				else if (wordWidth + spaceWidth > spaceLeft)
+				else if (wordWidth + spaceWidth > spaceRemaining)
 				{
 					result.AppendLine();
-					spaceLeft = lineWidth - wordWidth;
+					spaceRemaining = lineWidth - wordWidth;
 				}
 				else
 				{
-					spaceLeft -= (wordWidth + spaceWidth);
+					spaceRemaining -= (wordWidth + spaceWidth);
 				}
 				result.Append(word + space);
 			}
@@ -321,7 +326,87 @@ namespace BrUtility
 			return fStr;
 		}
 
-		public static string FirstCharacterToLower(string str)
+		//Wraps words, but instead of wrapping them with newlines, wraps them into an array (with each element being a line).
+        public static string[] WrapTextAsArray(FontInfo font, string text, float lineWidth)
+        {
+            string[] words = text.Split(splitTextBy, StringSplitOptions.RemoveEmptyEntries);
+            float spaceWidth = font.StringWidth(space);
+            float spaceRemaining = lineWidth;
+            float wordWidth;
+
+			StringBuilder currentLine = new StringBuilder();
+			List<string> lines = new List<string>();
+
+            foreach (string word in words)
+            {
+                string fword = word;
+
+                wordWidth = font.StringWidth(word);
+
+				//We split by space (and can't split by \n since we still want to force a newline)
+				//so if we do happen to encounter a word with a newline in it, we must handle the before and after manually.
+                if (word.Contains("\n"))
+                {
+                    string[] newlineWords = fword.Split('\n');
+
+                    for (int i = 0; i < newlineWords.Length; i++)
+                    {
+                        string newlineWord = newlineWords[i];
+
+                        wordWidth = font.StringWidth(newlineWord);
+
+                        if (wordWidth + spaceWidth > spaceRemaining)
+                        {
+							lines.Add(currentLine.ToString());
+							currentLine.Clear();
+                            //result.AppendLine();
+                            spaceRemaining = lineWidth - wordWidth;
+                        }
+                        else
+                        {
+                            spaceRemaining -= (wordWidth + spaceWidth);
+                        }
+
+                        if (i != 0)
+                        {
+                            lines.Add(currentLine.ToString());
+                            currentLine.Clear();
+							currentLine.Append(newlineWord + space);
+                            //result.AppendLine();
+                            //result.Append(newlineWord + space);
+                            spaceRemaining = lineWidth - wordWidth;  //this is setting to the previous word's length not the new one
+                        }
+						else
+						{
+							currentLine.Append(newlineWord + space);
+							//result.Append(newlineWord + space);
+                        }
+                    }
+                    continue;   //we don't want to reach the end because reasons
+                }
+                else if (wordWidth + spaceWidth > spaceRemaining)
+                {
+					lines.Add(currentLine.ToString());
+					currentLine.Clear();
+                    //result.AppendLine();
+                    spaceRemaining = lineWidth - wordWidth;
+                }
+                else
+                {
+                    spaceRemaining -= (wordWidth + spaceWidth);
+                }
+
+				currentLine.Append(word + space);
+                //result.Append(word + space);
+            }
+
+			if (currentLine.Length > 0)
+				lines.Add(currentLine.ToString());
+
+			return lines.ToArray();
+        }
+
+        public static string FirstCharacterToLower(string str)
 		{
 			if (String.IsNullOrEmpty(str) || Char.IsLower(str, 0))
 				return str;
