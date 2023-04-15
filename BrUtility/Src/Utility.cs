@@ -106,12 +106,32 @@ namespace BrUtility
 			}
 		}
 
-		/// <summary>
-		/// Get all types that have the given attribute type.
-		/// </summary>
-		/// <param name="assembly">The executing assembly to search in.</param>
-		/// <param name="t">The type of the attribute.</param>
-		public static IEnumerable<Type> GetTypesWithAttribute(Assembly assembly, Type attributeType)
+        /// <summary>
+        /// Get all types that have the given attribute type.
+        /// </summary>
+        /// <param name="assembly">The executing assembly to search in.</param>
+        /// <param name="t">The type of the attribute.</param>
+        public static IEnumerable<(Type, T)> GetTypesWithAttribute<T>() where T : Attribute
+        {
+            foreach (Assembly assemb in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                foreach (Type type in assemb.GetTypes())
+                {
+					IEnumerable<T> attribs = type.GetCustomAttributes<T>();
+                    if (attribs.Count() > 0)
+                    {
+                        yield return (type, attribs.First());
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get all types that have the given attribute type.
+        /// </summary>
+        /// <param name="assembly">The executing assembly to search in.</param>
+        /// <param name="t">The type of the attribute.</param>
+        public static IEnumerable<Type> GetTypesWithAttribute(Assembly assembly, Type attributeType)
 		{
 			foreach (Type type in assembly.GetTypes())
 			{

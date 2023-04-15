@@ -46,6 +46,10 @@ namespace BrUtility
             transparentPixel = new Texture2D(graphics, 1, 1);
             transparentPixel.SetData(new Color[] { new Color(0, 0, 0, 0) });
             transparentPixel.Name = "TransparentPixel";
+
+            normalPixel = new Texture2D(graphics, 1, 1);
+            normalPixel.SetData(new Color[] { new Color(127, 127, 255) });
+            normalPixel.Name = "NormalPixel";
         }
 
         internal static Texture2D whitePixel;
@@ -82,6 +86,19 @@ namespace BrUtility
                 else throw new Exception("DrawHelper has not been initialized. Call DrawHelper.Initialize in your LoadContent override.");
             }
             set { transparentPixel = value; }
+        }
+
+        //For use in normal maps.
+        internal static Texture2D normalPixel;
+        public static Texture2D NormalPixel
+        {
+            get
+            {
+                if (normalPixel != null)
+                    return normalPixel;
+                else throw new Exception("DrawHelper has not been initialized. Call DrawHelper.Initialize in your LoadContent override.");
+            }
+            set { normalPixel = value; }
         }
 
         public static BlendState CopyBlendState(BlendState copy)
