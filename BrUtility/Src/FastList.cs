@@ -1,6 +1,7 @@
 ﻿//Taken from nez's codebase @831bdc2: https://github.com/prime31/Nez/blob/master/Nez.Portable/Utils/Collections/FastList.cs
 //Modified slightly to use my own api instead of nez's.
 
+using SharpDX.MediaFoundation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,6 +47,10 @@ namespace BrUtility
 		/// <param name="index">Index.</param>
 		public T this[int index] => Buffer[index];
 
+		public Span<T> Slice()
+		{
+			return new Span<T>(Buffer, 0, Length);
+		}
 
 		/// <summary>
 		/// clears the list and nulls out all items in the buffer
