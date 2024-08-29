@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpDX.MediaFoundation;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -56,6 +57,11 @@ namespace BrUtility.Ported
 		public void Clear()
 		{
 			objs.Clear();
+		}
+
+		public IReadOnlyList<T> GetEnumerable()
+		{
+			return objs;
 		}
 	}
 }
