@@ -89,7 +89,22 @@ namespace A1r.Input
 
 		private Dictionary<string, int> repeatedKeys = new Dictionary<string, int>();
 
-		public bool InputCaptured;	//input is being captured by something else
+		private bool inputCaptured;
+		public bool InputCaptured
+		{
+			get { return inputCaptured; }
+			set
+			{
+				inputCaptured = value;
+				if (inputCaptured)
+				{
+					currentKeyboardState = new KeyboardState();
+					previousKeyboardState = new KeyboardState();
+					currentMouseState = new MouseState();
+					previousMouseState = new MouseState();
+				}
+			}
+		}	//input is being captured by something else
 
 		public InputManager(Game game) : base(game)
 		{
