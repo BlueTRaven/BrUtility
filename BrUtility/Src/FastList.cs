@@ -1,10 +1,10 @@
 ﻿//Taken from nez's codebase @831bdc2: https://github.com/prime31/Nez/blob/master/Nez.Portable/Utils/Collections/FastList.cs
 //Modified slightly to use my own api instead of nez's.
 
-using SharpDX.MediaFoundation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -162,6 +162,12 @@ namespace BrUtility
 		public void AddRange(IEnumerable<T> array)
 		{
 			foreach (var item in array)
+				Add(item);
+		}
+
+		public void AddRange(Span<T> slice)
+		{
+			foreach (var item in slice)
 				Add(item);
 		}
 
