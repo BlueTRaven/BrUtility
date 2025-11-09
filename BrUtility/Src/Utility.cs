@@ -47,7 +47,7 @@ namespace BrUtility
 			{
 				foreach (Type type in assemb.GetTypes())
 				{
-					if (type.Name == name)
+					if (type.Name == name || type.FullName == name)
 						return type;
 				}
 			}
