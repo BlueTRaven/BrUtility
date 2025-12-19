@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -81,6 +82,11 @@ namespace BrUtility
 			Buffer[Length++] = item;
 		}
 
+		public void AddAssumeCapacity(T item)
+		{
+			Debug.Assert(Length < Buffer.Length);
+			Add(item);
+		}
 
 		/// <summary>
 		/// removes the item from the list
