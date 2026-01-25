@@ -30,6 +30,7 @@ namespace BrUtility
 		/// </summary>
 		public int Length = 0;
 
+		public static FastList<T> EMPTY = new FastList<T>(0);
 
 		public FastList(int size)
 		{

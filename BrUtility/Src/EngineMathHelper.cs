@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,41 @@ namespace BrUtility
 {
     public static class EngineMathHelper
     {
+        public static Vector3 QuaternionToYawPitchRoll(Quaternion quat)
+        {
+            // WARNING: ChatGPT generated this!
+            // Pitch (X axis)
+            double sinp = 2.0 * (quat.W * quat.X - quat.Y * quat.Z);
+            double pitch;
+            if (Math.Abs(sinp) >= 1)
+            {
+                var sign = Math.Sign(sinp);
+                pitch = Math.PI / 2 * sign; // gimbal lock
+            }
+            else
+                pitch = Math.Asin(sinp);
+
+            // Yaw (Y axis)
+            double siny = 2.0 * (quat.W * quat.Y + quat.Z * quat.X);
+            double cosy = 1.0 - 2.0 * (quat.X * quat.X + quat.Y * quat.Y);
+            double yaw = Math.Atan2(siny, cosy);
+
+            // Roll (Z axis)
+            double sinr = 2.0 * (quat.W * quat.Z + quat.X * quat.Y);
+            double cosr = 1.0 - 2.0 * (quat.X * quat.X + quat.Z * quat.Z);
+            double roll = Math.Atan2(sinr, cosr);
+
+            return new Vector3((float)yaw, (float)pitch, (float)roll);
+
+            //float roll = (float)Math.Atan2(2 * (quat.W * quat.X + quat.Y * quat.Z), 1 - 2 * (quat.X * quat.X + quat.Y * quat.Y));
+
+            //float pitch = (float)Math.Asin(2 * (quat.W * quat.Y - quat.Z * quat.X));
+
+            //float yaw = (float)Math.Atan2(2 * (quat.W * quat.Z + quat.X * quat.Y), 1 - 2 * (quat.Y * quat.Y + quat.Z * quat.Z));
+
+            //return new Vector3(yaw, pitch, roll);
+        }
+
         public static int Mod(int x, int m)
         {
             int r = x % m;
@@ -91,5 +127,27 @@ namespace BrUtility
 
 			return start;*/
 		}
+
+        // WARNING: chatgpt generated
+        public static Quaternion LookRotation(Vector3 direction, Vector3 up)
+        {
+            if (direction == Vector3.Zero)
+                return Quaternion.Identity;
+
+            direction.Normalize();
+
+            // Create an orthonormal basis
+            Vector3 right = Vector3.Normalize(Vector3.Cross(up, direction));
+            Vector3 correctedUp = Vector3.Cross(direction, right);
+
+            Matrix rotationMatrix = new Matrix(
+                right.X, right.Y, right.Z, 0,
+                correctedUp.X, correctedUp.Y, correctedUp.Z, 0,
+                direction.X, direction.Y, direction.Z, 0,
+                0, 0, 0, 1
+            );
+
+            return Quaternion.CreateFromRotationMatrix(rotationMatrix);
+        }
     }
 }

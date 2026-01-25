@@ -1,11 +1,13 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+using static Microsoft.Xna.Framework.Graphics.SpriteFont;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace BrUtility
 {
@@ -41,19 +43,91 @@ namespace BrUtility
 				else this.outlineColor = Color.Black;
 			}
 
-			public Size StringSize(string str)
+			public Size StringSize(ReadOnlySpan<char> str)
 			{
-				return (font.MeasureString(str) * size).ToSize();
+				return (MeasureString(str) * size).ToSize();
 			}
 
-			public float StringWidth(string str)
+			public float StringWidth(ReadOnlySpan<char> str)
 			{
 				return StringSize(str).Width;
 			}
 
-			public float StringHeight(string str)
+			public float StringHeight(ReadOnlySpan<char> str)
 			{
 				return StringSize(str).Height;
+			}
+
+			private unsafe Vector2 MeasureString(ReadOnlySpan<char> text)
+			{
+                if (text.Length == 0)
+                {
+                    return Vector2.Zero;
+                }
+
+                var width = 0.0f;
+                var finalLineHeight = (float)LineSpacing;
+
+                var offset = Vector2.Zero;
+                var firstGlyphOfLine = true;
+
+                fixed (Glyph* pGlyphs = font.Glyphs)
+                    for (var i = 0; i < text.Length; ++i)
+                    {
+                        var c = text[i];
+
+                        if (c == '\r')
+                            continue;
+
+                        if (c == '\n')
+                        {
+                            finalLineHeight = LineSpacing;
+
+                            offset.X = 0;
+                            offset.Y += LineSpacing;
+                            firstGlyphOfLine = true;
+                            continue;
+                        }
+
+                        var currentGlyphIndex = GetGlyphIndex(c);
+                        Debug.Assert(currentGlyphIndex >= 0 && currentGlyphIndex < font.Glyphs.Length, "currentGlyphIndex was outside the bounds of the array.");
+                        var pCurrentGlyph = pGlyphs + currentGlyphIndex;
+
+                        // The first character on a line might have a negative left side bearing.
+                        // In this scenario, SpriteBatch/SpriteFont normally offset the text to the right,
+                        //  so that text does not hang off the left side of its rectangle.
+                        if (firstGlyphOfLine)
+                        {
+                            offset.X = Math.Max(pCurrentGlyph->LeftSideBearing, 0);
+                            firstGlyphOfLine = false;
+                        }
+                        else
+                        {
+                            offset.X += Spacing + pCurrentGlyph->LeftSideBearing;
+                        }
+
+                        offset.X += pCurrentGlyph->Width;
+
+                        var proposedWidth = offset.X + Math.Max(pCurrentGlyph->RightSideBearing, 0);
+                        if (proposedWidth > width)
+                            width = proposedWidth;
+
+                        offset.X += pCurrentGlyph->RightSideBearing;
+
+                        if (pCurrentGlyph->Cropping.Height > finalLineHeight)
+                            finalLineHeight = pCurrentGlyph->Cropping.Height;
+                    }
+
+				return new Vector2(width, offset.Y + finalLineHeight);
+            }
+
+			private int GetGlyphIndex(char c)
+			{
+				for (int i = 0; i < this.font.Glyphs.Length; i++)
+				{
+					if (font.Glyphs[i].Character == c) return i;
+				}
+				return 0;
 			}
 		}
 
@@ -108,7 +182,7 @@ namespace BrUtility
 		public static void DrawText(SpriteBatch batch, FontInfo fontText, WrappedText wrappedText, Vector2 alignmentOffset, Color color, Rectangle bounds, float drawDepth = 0, OverFlowAction overflowAction = OverFlowAction.DontDrawOverflow)
 		{
 			//If wrapWidth is -1, don't wrap the text.
-			Vector2 size = fontText.StringSize(wrappedText.text).ToVector2();
+			Vector2 size = fontText.StringSize(wrappedText.text.AsSpan()).ToVector2();
 			if (size.Y > bounds.Size.Y && overflowAction == OverFlowAction.DontDrawAny)
 				return;
 
@@ -209,19 +283,20 @@ namespace BrUtility
 
 			string[] lines = wrapped.Split('\n');
 
-			Vector2 size = fontInfo.StringSize(wrapped).ToVector2();
+			Vector2 size = fontInfo.StringSize(wrapped.AsSpan()).ToVector2();
 
 			float ypos = size.Y - fontInfo.LineSpacing;
-			float xpos = fontInfo.StringWidth(lines.Last());
+			float xpos = fontInfo.StringWidth(lines.Last().AsSpan());
 
 			return drawPosition + new Vector2(xpos, ypos);
 		}
 
 		public static Vector2 GetAlignmentOffset(FontInfo font, string text, int offset, int length, Rectangle bounds, Enums.Alignment alignment)
 		{
-			//TODO: remove text.Substring. This is an allocation that I don't want!
 			Vector2 size = Vector2.Zero;
-			try { size = font.StringSize(text.Substring(offset, length)).ToVector2(); }
+			try { 
+				size = font.StringSize(text.AsSpan().Slice(offset, length)).ToVector2(); 
+			}
 			catch
 			{
 				Logger.GetOrCreate("BrUtility").Log(Logger.LogLevel.Error, "Text has no size (empty or invalid string.)");
@@ -260,7 +335,7 @@ namespace BrUtility
 		public static string WrapText(FontInfo font, string text, float lineWidth)
 		{
 			string[] words = text.Split(splitTextBy, StringSplitOptions.RemoveEmptyEntries);
-			float spaceWidth = font.StringWidth(space);
+			float spaceWidth = font.StringWidth(space.AsSpan());
 			float spaceRemaining = lineWidth;
 			float wordWidth;
 
@@ -270,7 +345,7 @@ namespace BrUtility
 			{
 				string fword = word;
 				
-				wordWidth = font.StringWidth(word);
+				wordWidth = font.StringWidth(word.AsSpan());
 
 				if (word.Contains("\n"))
 				{
@@ -280,7 +355,7 @@ namespace BrUtility
 					{
 						string newlineWord = newlineWords[i];
 						
-						wordWidth = font.StringWidth(newlineWord);
+						wordWidth = font.StringWidth(newlineWord.AsSpan());
 
 						if (wordWidth + spaceWidth > spaceRemaining)
 						{
@@ -330,7 +405,7 @@ namespace BrUtility
         public static string[] WrapTextAsArray(FontInfo font, string text, float lineWidth)
         {
             string[] words = text.Split(splitTextBy, StringSplitOptions.RemoveEmptyEntries);
-            float spaceWidth = font.StringWidth(space);
+            float spaceWidth = font.StringWidth(space.AsSpan());
             float spaceRemaining = lineWidth;
             float wordWidth;
 
@@ -341,7 +416,7 @@ namespace BrUtility
             {
                 string fword = word;
 
-                wordWidth = font.StringWidth(word);
+                wordWidth = font.StringWidth(word.AsSpan());
 
 				//We split by space (and can't split by \n since we still want to force a newline)
 				//so if we do happen to encounter a word with a newline in it, we must handle the before and after manually.
@@ -353,7 +428,7 @@ namespace BrUtility
                     {
                         string newlineWord = newlineWords[i];
 
-                        wordWidth = font.StringWidth(newlineWord);
+                        wordWidth = font.StringWidth(newlineWord.AsSpan());
 
                         if (wordWidth + spaceWidth > spaceRemaining)
                         {
