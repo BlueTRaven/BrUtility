@@ -117,7 +117,7 @@ namespace BrUtility
 
 			return start + (f * percent);
 
-			/*float lerpSafeAngle = end;
+            /*float lerpSafeAngle = end;
 			float theta = end - start;
 			if (theta > 180)
 				start += 360;
@@ -126,10 +126,10 @@ namespace BrUtility
 			start += (lerpSafeAngle - start) * percent;
 
 			return start;*/
-		}
+        }
 
         // WARNING: chatgpt generated
-        public static Quaternion LookRotation(Vector3 direction, Vector3 up)
+        public static Quaternion DirectionToQuaternion(Vector3 direction, Vector3 up)
         {
             if (direction == Vector3.Zero)
                 return Quaternion.Identity;
@@ -148,6 +148,11 @@ namespace BrUtility
             );
 
             return Quaternion.CreateFromRotationMatrix(rotationMatrix);
+        }
+
+        public static Quaternion DirectionYawOnlyToQuaternion(Vector3 direction, Vector3 up)
+        {
+            return DirectionToQuaternion(new Vector3(direction.X, 0, direction.Z), up);
         }
     }
 }
